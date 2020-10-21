@@ -73,7 +73,7 @@ outputs:
     
   - 
     name: lbvserver-comp-final
-    value: if-then-else($parameters.protection.backupvserver-param,$components.lb-config-comp-final-with-backup.outputs.lbvserver,$components.lb-config-comp-final-without-backup.outputs.lbvserver)
+    value: $components.lb-config-comp-final-without-backup.outputs.lbvserver
 operations:
   analytics:
     -
