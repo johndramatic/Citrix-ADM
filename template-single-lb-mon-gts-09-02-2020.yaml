@@ -71,3 +71,16 @@ components:
           priority: 100
           bindpoint: REQUEST
           policyname: $parent.outputs.bot-policy-name
+      operations:
+analytics:
+  -
+    name: lbvserver-ops-comp1
+    properties:
+      target: $components.lb-mon-comps.outputs.lbvserver
+      filter: "true"
+      insights:
+        -
+          type: webinsight
+        -
+          type: securityinsight 
+       
