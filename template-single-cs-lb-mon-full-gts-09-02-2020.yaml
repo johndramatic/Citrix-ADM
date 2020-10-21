@@ -72,3 +72,15 @@ components:
           priority: 100
           bindpoint: REQUEST
           policyname: $parent.outputs.bot-policy-name
+operations:
+  analytics:
+    -
+      name: csvserver-ops-comp-final
+      properties:
+        target: $components.cs-mon-comp.outputs.csvserver
+        filter: "true"
+        insights:
+          -
+            type: webinsight
+          -
+            type: securityinsight
