@@ -75,7 +75,7 @@ components:
 operations:
   analytics:
     -
-      name: csvserver-ops-comp
+      name: csvserver-ops-comp-final
       properties:
         target: $components.cs-mon-comp.outputs.csvserver
         filter: "true"
