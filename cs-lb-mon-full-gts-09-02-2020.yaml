@@ -35,7 +35,7 @@ components:
     name: csvserver-comp
     type: ns::csvserver
     properties: 
-      name: $parameters.appname + "-" + $parameters.cs-service-type + "-" + str($parameters.cs-virtual-port) + "-" + $substitutions.fill-appowner($parameters.owner) + "-cs"
+      name: $parameters.appname + "-" + $parameters.cs-service-type + "-" + str($parameters.cs-virtual-port) + "-k" + $substitutions.fill-appowner($parameters.owner) + "-cs"
       servicetype: $parameters.cs-service-type
       ipv46: $parameters.lb-virtual-ip
       port?: $parameters.cs-virtual-port
