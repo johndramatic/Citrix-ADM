@@ -3,7 +3,6 @@ name: lb-mon-full-final-gts-09-02-2020
 namespace: com.citrix.adc.stylebooks
 version: "1.0"
 display-name: Load Balancing StyleBook with L7 Features -gts-09-02-2020   
-private: true
 description: |    
     This StyleBook builds on, and augments the lb-mon StyleBook by adding the ability    
     to make use of rewrite, responder and SSL ciphers features of the Citrix ADC
