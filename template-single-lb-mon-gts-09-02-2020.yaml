@@ -69,7 +69,7 @@ operations:
             type: webinsight
           - 
             type: securityinsight
-        target: $components.lb-mon-comps.outputs.lbvserver-final
+        target: $components.lb-mon-comps.outputs.lbvserver-comp-final
 parameters-default-sources: 
   - "cmtypes::app-params-gts-09-02-2020"
   - "cmtypes::lbvserver-params-gts-09-02-2020"
