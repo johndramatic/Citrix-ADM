@@ -76,7 +76,7 @@ analytics:
   -
     name: lbvserver-ops-comp1
     properties:
-      target: $components.lb-mon-comps.outputs.lbvserver
+      target: $components.lb-mon-comps.outputs.lbvserver-comp
       filter: "true"
       insights:
         -
