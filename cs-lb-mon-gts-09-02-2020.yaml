@@ -126,5 +126,5 @@ outputs:
     condition: $parameters.pools
     repeat: $components.csvserver-comp.components.lb-mon-comps
     repeat-item: lb-mon-item 
-    value: $lb-mon-item.outputs.lbvserver
+    value: $lb-mon-item.outputs.lbvserver-name
     description: "The other LBvserver components to which traffic is switched based on rule"
