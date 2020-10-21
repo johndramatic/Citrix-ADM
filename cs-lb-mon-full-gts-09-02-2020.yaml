@@ -185,16 +185,3 @@ outputs:
     repeat-item: lb-mon-item 
     value: $lb-mon-item.outputs.lbvserver-name
     description: "The other LBvserver components to which traffic is switched based on rule"
-operations:
-  analytics:
-    -
-      name: csvserver-ops-comp
-      condition: $parameters.cs-service-type == str("SSL") OR $parameters.cs-service-type == str("HTTP")
-      properties:
-        target: $outputs.csvserver
-        filter: "true"
-        insights:
-          -
-            type: webinsight
-          -
-            type: securityinsight 
