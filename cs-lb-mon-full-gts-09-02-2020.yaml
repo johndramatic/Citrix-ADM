@@ -176,14 +176,14 @@ outputs:
   -
     name: default-lbvserver
     condition: $parameters.default-lb-pool
-    value: $components.csvserver-comp.components.default-lb-mon-comp.outputs.lbvserver
+    value: $components.csvserver-comp.components.default-lb-mon-comp.outputs.lbvserver-name
     description: "The default LBvserver component"
   -
     name: non-default-lbvservers
     condition: $parameters.pools
     repeat: $components.csvserver-comp.components.lb-mon-comps
     repeat-item: lb-mon-item 
-    value: $lb-mon-item.outputs.lbvserver
+    value: $lb-mon-item.outputs.lbvserver-name
     description: "The other LBvserver components to which traffic is switched based on rule"
 operations:
   analytics:
