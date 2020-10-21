@@ -81,7 +81,7 @@ components:
             name: lb-bot-policy-binding
             type: ns::lbvserver_botpolicy_binding
             properties:
-              name: $parent.parent.outputs.lbvserver
+              name: $parent.parent.outputs.lbvserver-name
               priority: 100
               bindpoint: REQUEST
               policyname: $parent.outputs.bot-policy-name
