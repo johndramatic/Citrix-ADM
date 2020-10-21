@@ -65,7 +65,7 @@ components:
       redirect-url?: $parameters.protection.backup-redirecturl
 outputs: 
   - 
-    name: lbvserver
+    name: lbvserver-name
     value: if-then-else($parameters.protection.backupvserver-param,$components.lb-config-comp-final-with-backup.outputs.lbvserver.properties.name,$components.lb-config-comp-final-without-backup.outputs.lbvserver.properties.name)
   - 
     name: backup-lbvserver
