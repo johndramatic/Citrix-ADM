@@ -51,7 +51,7 @@ components:
     properties-default-sources:
       - $parameters
     properties:
-      appname: $parameters.appname + "-" + $parameters.lb-service-type + "-" + $substitutions.lb-virtual-port($parameters.lb-virtual-port) + "-" + $parameters.owner
+      appname: $parameters.appname + "-" + $parameters.lb-service-type + "-kk" + $substitutions.lb-virtual-port($parameters.lb-virtual-port) + "-" + $parameters.owner
       redirect-url?: $parameters.protection.backup-redirecturl
   -
     name: lb-config-comp-final-with-backup
