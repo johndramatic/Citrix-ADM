@@ -74,28 +74,3 @@ outputs:
   - 
     name: lbvserver-comp-final
     value: if-then-else($parameters.protection.backupvserver-param,$components.lb-config-comp-final-with-backup.outputs.lbvserver,$components.lb-config-comp-final-without-backup.outputs.lbvserver)
-
-operations:
-  analytics:
-    -
-      name: lbvserver-without-backup-ops-comp
-      condition: ($parameters.lb-service-type == str("SSL") OR $parameters.lb-service-type == str("HTTP")) AND NOT $parameters.protection.backupvserver-param
-      properties:
-        target: $components.lb-config-comp-final-without-backup.outputs.lbvserver
-        filter: "true"
-        insights:
-          -
-            type: webinsight
-          -
-            type: securityinsight  
-    -
-      name: lbvserver-with-backup-ops-comp
-      condition: ($parameters.lb-service-type == str("SSL") OR $parameters.lb-service-type == str("HTTP")) AND $parameters.protection.backupvserver-param
-      properties:
-        target: $components.lb-config-comp-final-with-backup.outputs.lbvserver
-        filter: "true"
-        insights:
-          -
-            type: webinsight
-          -
-            type: securityinsight
