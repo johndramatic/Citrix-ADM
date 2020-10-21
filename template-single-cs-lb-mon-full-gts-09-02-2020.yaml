@@ -72,7 +72,7 @@ components:
           priority: 100
           bindpoint: REQUEST
           policyname: $parent.outputs.bot-policy-name
-  operations:
+operations:
   analytics:
     -
       name: csvserver-ops-comp
