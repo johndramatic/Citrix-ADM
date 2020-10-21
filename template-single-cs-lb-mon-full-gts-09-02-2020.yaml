@@ -77,7 +77,7 @@ operations:
     -
       name: csvserver-ops-comp-final
       properties:
-        target: $components.cs-mon-comp.outputs.csvserver
+        target: $components.cs-mon-comps.outputs.csvserver
         filter: "true"
         insights:
           -
