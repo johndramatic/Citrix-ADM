@@ -1,0 +1,45 @@
+name: cs-responder-config-params-gts-09-02-2020   
+namespace: com.citrix.adc.commontypes
+version: "1.0"
+display-name: Responder Configuration for CS
+private: true
+schema-version: "1.0"
+import-stylebooks: 
+  - 
+    namespace: com.citrix.adc.commontypes
+    version: "1.0"
+    prefix: cmtypes
+parameters:
+    -
+        name: responder-config
+        label: Responder Configs Section
+        type: object
+        gui: 
+            collapse_pane: true  
+        parameters:
+            -
+                name: redirect-to-https
+                type: boolean
+                label: Redirect to HTTPS
+                description: Redirect all HTTP requests to an equivalent HTTPS URL
+                default: false
+                gui:
+                  hidden: true
+            -
+                name: redirectfromport
+                type: number
+                label: "Redirect From Port"
+                description: "Port number for the virtual server, from which we absorb the traffic for http redirect."
+                gui:
+                  hidden: true
+            -
+                name: httpsredirecturl
+                type: string
+                label: "HTTPS Redirect URL"
+                description: "URL to which to redirect traffic"
+                gui:
+                  hidden: true
+            -
+                name: advanced-responder-params
+                type: cmtypes::advanced-responder-params-gts-09-02-2020 []
+                label: Responder Parameters

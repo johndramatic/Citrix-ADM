@@ -1,0 +1,93 @@
+name: bot-profile-gts-09-02-2020
+namespace: com.citrix.adc.stylebooks
+version: "1.0"
+description: This Stylebook defines a BOT configuration with Bot profile.
+display-name: "API BOT Detection Stylebook"
+schema-version: "1.0"
+import-stylebooks:
+  -
+    namespace: netscaler.nitro.config
+    prefix: ns
+    version: "13.0"
+  -
+    namespace: com.citrix.adc.commontypes
+    prefix: cmtypes
+    version: "1.0"
+parameters-default-sources:
+  - cmtypes::app-params-gts-09-02-2020 
+  - cmtypes::bot-profile-params-gts-09-02-2020 
+substitutions:
+  onoff-replace:
+    false: "OFF"
+    true: "ON"
+components:
+  -
+    name: bot-enable-feature-comp
+    type: ns::nsfeature
+    description: Enables the BOT feature on Citrix ADC
+    meta-properties:
+      action: enable
+    properties:
+      feature: ["BOT", "Rep"]
+  -
+    name: bot-profile-comp
+    type: ns::botprofile
+    properties:
+      name: $parameters.appname
+      signature?: $parameters.application-security.enable-bot-signatures.signaturename
+      bot_enable_ip_reputation?: $substitutions.onoff-replace[exists($parameters.application-security.enable-ipreputation)]
+      bot_enable_white_list?: $substitutions.onoff-replace[exists($parameters.application-security.enable-allow-bot-list)]
+      bot_enable_black_list?: $substitutions.onoff-replace[exists($parameters.application-security.enable-deny-bot-list)]
+    components:
+      -
+        name: bot-bind-profile-ipreputation-bycategory-comp
+        type: ns::botprofile_ipreputation_binding
+        condition: $parameters.application-security.enable-ipreputation.ip-reputation
+        repeat: $parameters.application-security.enable-ipreputation.ip-reputation
+        repeat-item: iprep-category
+        properties:
+          name: $parent.properties.name
+          bot_ipreputation: "true"
+          category: $iprep-category.block-bycategory
+          bot_iprep_enabled: $iprep-category.ip-reputation-enabled
+          bot_iprep_action: [$iprep-category.block-bycategory-action, "LOG"]
+          bot_bind_comment?: $iprep-category.ip-reputation-comments
+      -
+        name: bot-bind-profile-allow-list
+        type: ns::botprofile_whitelist_binding
+        condition: $parameters.application-security.enable-allow-bot-list
+        repeat: $parameters.application-security.enable-allow-bot-list.allow-list
+        repeat-item: allow-list
+        properties:
+          name: $parent.properties.name
+          bot_whitelist: "true"
+          bot_whitelist_enabled: $allow-list.allow-list-enabled
+          bot_whitelist_type: $allow-list.allow-list-type
+          bot_whitelist_value: $allow-list.allow-list-value
+          bot_bind_comment?: $allow-list.allow-list-comments
+          log: "ON"
+      -
+        name: bot-bind-profile-deny-list
+        type: ns::botprofile_blacklist_binding
+        condition: $parameters.application-security.enable-deny-bot-list
+        repeat: $parameters.application-security.enable-deny-bot-list.deny-list
+        repeat-item: deny-list
+        properties:
+          name: $parent.properties.name
+          bot_blacklist: "true"
+          bot_blacklist_enabled: $deny-list.deny-list-enabled
+          bot_blacklist_type: $deny-list.deny-list-type
+          bot_blacklist_value: $deny-list.deny-list-value
+          bot_blacklist_action: ["LOG", $deny-list.deny-list-action]
+          bot_bind_comment?: $deny-list.deny-list-comments
+  -
+    name: bot-policy-comp
+    type: ns::botpolicy
+    properties:
+        name: $parameters.appname
+        rule: str(true)
+        profilename: $components.bot-profile-comp.properties.name
+outputs: 
+  - 
+    name: bot-policy-name
+    value: $components.bot-policy-comp.properties.name

@@ -1,0 +1,56 @@
+name: advanced-rewrite-params-gts-09-02-2020 
+namespace: com.citrix.adc.commontypes
+version: "1.0"
+display-name: Advance Rewrite Parameters
+private: true
+schema-version: "1.0"
+parameters:
+  - 
+    name: priority
+    label: "Priority"
+    description: "Priority of the policy. The Lower the number, the more prioritized."
+    type: number
+    required: true
+    min-value: 1
+    max-value: 65000
+    default: 100
+  -
+    name: pattern
+    type: string
+    label: Request Filter (Policy Expression)
+    description: The Citrix ADC Policy Expression that designates which traffic will be rewritten.
+    default: "true"
+    required: true
+  -
+    name: type
+    type: string
+    label: Type of of user-defined rewrite action
+    description: |
+        Type of user-defined rewrite action. The information that you provide for, and the effect of, each type are as follows
+        * REPLACE . Replaces the string with the string-builder expression.
+        * INSERT_BEFORE . Finds the string specified in and inserts the string in before it.
+        * INSERT_AFTER . Finds the string specified in , and inserts the string specified in after it.
+        * DELETE . Finds and deletes the specified target.
+    required: true
+    allowed-values:
+      - REPLACE
+      - INSERT_BEFORE
+      - INSERT_AFTER
+      - DELETE
+  -
+    name: target-location
+    type: string
+    label: Expression to choose target location
+    description: The expression that contains target location to perform rewrite.
+    required: true
+  -
+    name: expresion-with
+    type: string
+    label: Expression to Replace/INSERT_BEFORE/INSERT_AFTER with
+    description: Expression that specifies the content to insert into the request or response at the specified location, or that replaces the specified string.
+  -
+    name: on-response
+    label:  On Response 
+    description: If true, this rewrite will be applied to resposes. Be advised target location and request filters will need to match for response.
+    type: boolean
+    default: false

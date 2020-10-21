@@ -1,0 +1,44 @@
+--- 
+name: monitor-param-gts-09-02-2020   
+namespace: com.citrix.adc.commontypes
+version: "1.0"
+private: true
+display-name: "LB Monitor Parameters including TCP/Ping/Advance-monitors to be created and used"
+description: "This StyleBook defines Paramameters for LB Monitors TCP/PING/Adv-mon"
+schema-version: "1.0"
+import-stylebooks: 
+  - 
+    namespace: com.citrix.adc.commontypes
+    prefix: cmtypes
+    version: "1.0"
+parameters: 
+  - 
+    name: tcp-mon
+    label: "TCP Monitor"
+    description: "Use TCP Monitor to check port availability on backend server"
+    type: boolean
+    required: true
+  -
+    name: ping-mon
+    label: "Ping Monitor"
+    description: "Use PING Monitor to check ICMP reachability of backend server"
+    type: boolean
+    required: true
+
+  -
+    name: adv-mon
+    label: "Advanced Monitor"
+    type: object
+    parameters: 
+      - 
+        name: custom-adc-monitorname
+        label: "Custom ADC Monitor Name"
+        description: "Name of the custom monitor created on the ADC to be used. Warning: Monitor needs to be manually created on the ADC and name needs to match with its configured value"
+        type: string[]
+      -
+        name: monitors
+        label: "List of Monitors"
+        description: "List of Advanced Monitors to be used on Application Servers"
+        type: cmtypes::monitor-gts-09-02-2020[]
+        gui:
+            columns: 8

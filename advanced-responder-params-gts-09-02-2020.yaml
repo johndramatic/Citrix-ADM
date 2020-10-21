@@ -1,0 +1,64 @@
+name: advanced-responder-params-gts-09-02-2020 
+namespace: com.citrix.adc.commontypes
+version: "1.0"
+display-name: Redirect URL Parameters
+private: true
+schema-version: "1.0"
+parameters:
+  - 
+    name: priority
+    label: "Priority"
+    description: "Priority of policy. The Lower the number, the more prioritized."
+    type: number
+    required: true
+    min-value: 1
+    max-value: 65000
+    default: 100
+  -
+    name: pattern
+    type: string
+    label: Request Filter (Policy Expression)
+    description: The Citrix ADC Policy Expression used to select requests for which to perform action on the header
+    default: "true"
+    required: true
+  -
+    name: type
+    type: string
+    label: Type of responder action.
+    description: |
+        Type of responder action. Available settings function as follows:
+        * NOOP - Send the request to the protected server instead of responding to it.
+        * RESET - Reset the client connection by closing it. The client program, such as a browser, will handle this and may inform the user. The client may then resend the request if desired.
+        * DROP - Drop the request without sending a response to the user.
+        * respondwith <target> - Respond to the request with the expression specified as the target.
+        * redirect - Redirect the request to the URL specified as the target.
+    required: true
+    allowed-values:
+      - NOOP
+      - RESET
+      - DROP
+      - respondwith
+      - redirect
+    default: redirect
+    gui:
+        dependent-parameters:
+            -
+                matching-values:
+                    - respondwith
+                    - redirect
+                target-parameter: $parameters.target-expr
+                action: show
+  -
+    name: target-expr
+    type: string
+    label: Policy Expression specifying what to respond with. (Only valid for type redirect and respondwith)
+    description: |
+        In addition to NetScaler default-syntax expressions that refer to information in the request, a stringbuilder expression can contain text and HTML, and simple escape codes that define new lines and paragraphs. Enclose each stringbuilder expression element (either a NetScaler default-syntax expression or a string) in double quotation marks. Use the plus (+) character to join the elements.
+        Examples:
+        1) Respondwith expression that sends an HTTP 1.1 200 OK response:
+        "HTTP/1.1 200 OK\r\n\r\n"
+        2) Redirect expression that redirects user to the specified web host and appends the request URL to the redirect.
+        "http://backupsite2.com" + HTTP.REQ.URL
+        3) Respondwith expression that sends an HTTP 1.1 404 Not Found response with the request URL included in the response:
+        "HTTP/1.1 404 Not Found\r\n\r\n"+ "HTTP.REQ.URL.HTTP_URL_SAFE" + "does not exist on the web server."
+

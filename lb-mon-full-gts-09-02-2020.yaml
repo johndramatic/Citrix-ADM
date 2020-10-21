@@ -1,0 +1,276 @@
+--- 
+name: lb-mon-full-gts-09-02-2020   
+namespace: com.citrix.adc.stylebooks
+version: "1.0"
+display-name: Load Balancing StyleBook with L7 Features -gts-09-02-2020   
+private: true
+description: |    
+    This StyleBook builds on, and augments the lb-mon StyleBook by adding the ability    
+    to make use of rewrite, responder and backup virtual server features of the Citrix ADC
+schema-version: "1.0"
+import-stylebooks:
+  - 
+    namespace: netscaler.nitro.config
+    prefix: ns
+    version: "13.0" 
+  - 
+    namespace: com.citrix.adc.stylebooks
+    prefix: stlb
+    version: "1.0"
+  - 
+    namespace: com.citrix.adc.commontypes
+    prefix: cmtypes
+    version: "1.0"
+parameters-default-sources:
+    - cmtypes::app-params-gts-09-02-2020 
+    - cmtypes::lbvserver-params-gts-09-02-2020   
+    - cmtypes::services-params-gts-09-02-2020   
+    - cmtypes::certificate-param-gts-09-02-2020 
+    - cmtypes::rewrite-config-params-gts-09-02-2020   
+    - cmtypes::responder-config-params-gts-09-02-2020 
+    - cmtypes::ssl-config-params-gts-09-02-2020 
+components:
+  - 
+    name: lbvserver-comp
+    type: ns::lbvserver
+    properties: 
+      name: $parameters.appname + "-lbvserver"
+      servicetype: $parameters.lb-service-type
+      ipv46: $parameters.lb-virtual-ip
+      port?: $parameters.lb-virtual-port
+      lbmethod?: $parameters.algorithm
+      backuplbmethod?: $parameters.backuplbmethod
+      netmask?: $parameters.netmask
+      v6netmasklen?: $parameters.v6netmasklen
+      hashlength?: $parameters.hashlength
+      persistencetype?: $parameters.persistence-parameter.persistence
+      rule?: $parameters.persistence-parameter.rule-expression
+      resrule?: $parameters.persistence-parameter.resrule-expression
+      timeout?: $parameters.persistence-parameter.timeout
+      persistmask?: $parameters.persistence-parameter.persistmask
+      v6persistmasklen?: $parameters.persistence-parameter.v6persistmasklen
+      persistencebackup?: $parameters.persistence-parameter.persistence-backup
+      backuppersistencetimeout?: $parameters.persistence-parameter.backup-persistence-timeout
+      cookiename?: $parameters.persistence-parameter.cookiename
+      healththreshold?: $parameters.lb-advanced.traffic-settings.health-threshold
+      clttimeout?: $parameters.lb-advanced.traffic-settings.client-timeout
+      insertvserveripport?: $parameters.lb-advanced.traffic-settings.insert-vserver-ipport
+      vipheader?: $parameters.lb-advanced.traffic-settings.vipheader
+      downstateflush?: $parameters.lb-advanced.traffic-settings.flush-on-state-down
+      redirurl?: $parameters.redirect-url
+      backupvserver?: $parameters.backupvserver-param
+      somethod?: $parameters.lb-advanced.spillover-settings.spillover-method
+      sothreshold?: $parameters.lb-advanced.spillover-settings.spillover-threshold
+      tcpprofilename?: $parameters.lb-advanced.profiles.tcp-profile
+      httpprofilename?: $parameters.lb-advanced.profiles.http-profile
+      dbprofilename?: $parameters.lb-advanced.profiles.db-profile
+      dnsprofilename?: $parameters.lb-advanced.profiles.dns-profile
+      lbprofilename?: $parameters.lb-advanced.profiles.lb-profile
+      authentication?: $parameters.lb-advanced.auth-params.authentication
+      authenticationhost?: $parameters.lb-advanced.auth-params.authentication-host
+      authnvsname?: $parameters.lb-advanced.auth-params.authentication-vserver-name
+      authn401?: $parameters.lb-advanced.auth-params.authentication-http-401
+      appflowlog?: $parameters.lb-advanced.appflow-log
+      redirectfromport?: $parameters.responder-config.redirectfromport
+      httpsredirecturl?: $parameters.responder-config.httpsredirecturl
+      comment?: $parameters.owner
+      netprofile?: $parameters.netprofile-param
+    components: 
+      - 
+        name: servicegroup-comp
+        type: ns::servicegroup
+        condition: $parameters.svg-param.svc-servers OR $parameters.svg-param.svc-server-domains
+        properties: 
+          servicegroupname: $parameters.appname + "-svcgrp"
+          servicetype: $parameters.svg-param.svc-service-type
+          monconnectionclose?: $parameters.svg-param.svcg-advanced.svc-monconnectionclose
+          cip?: $parameters.svg-param.svcg-advanced.svcg-settings.svc-client-ip
+          cipheader?: $parameters.svg-param.svcg-advanced.svcg-settings.svc-client-ip-header
+          cka?: $parameters.svg-param.svcg-advanced.svcg-settings.svc-client-keepalive
+          clttimeout?: $parameters.svg-param.svcg-advanced.svcg-thresholds_timeouts.svc-client-timeout
+          svrtimeout?: $parameters.svg-param.svcg-advanced.svcg-thresholds_timeouts.svc-server-timeout
+          maxclient?: $parameters.svg-param.svcg-advanced.svcg-thresholds_timeouts.svc-max-clients
+          maxreq?: $parameters.svg-param.svcg-advanced.svcg-thresholds_timeouts.svc-max-requests
+          tcpb?: $parameters.svg-param.svcg-advanced.svcg-settings.svc-tcp-buffering
+          usip?: $parameters.svg-param.svcg-advanced.svcg-settings.svc-use-source-ip
+          useproxyport?: $parameters.svg-param.svcg-advanced.svcg-settings.svc-use-proxy-port
+          cmp?: $parameters.svg-param.svcg-advanced.svcg-settings.svc-compression
+          sc?: $parameters.svg-param.svcg-advanced.svcg-settings.svc-sure-connect
+          sp?: $parameters.svg-param.svcg-advanced.svcg-settings.svc-surge-protection
+          downstateflush?: $parameters.svg-param.svcg-advanced.svcg-settings.svc-downstate-flush
+          state?: $parameters.svg-param.svcg-advanced.svc-state
+          healthmonitor?: $parameters.svg-param.svcg-advanced.svc-enable-health-monitor
+          comment?: $parameters.owner
+          netprofile?: $parameters.netprofile-param
+          httpprofilename?: $parameters.svg-param.svcg-advanced.svcg-profiles.http-profile
+          tcpprofilename?: $parameters.svg-param.svcg-advanced.svcg-profiles.tcp-profile
+        components: 
+          - 
+            name: lbvserver-svg-binding
+            type: ns::lbvserver_servicegroup_binding
+            properties: 
+              name: $parent.parent.properties.name
+              servicegroupname: $parent.properties.servicegroupname
+          - 
+            name: svg-ip-members
+            type: ns::servicegroup_servicegroupmember_binding
+            condition: $parameters.svg-param.svc-servers
+            repeat: $parameters.svg-param.svc-servers
+            repeat-condition: $parameters.svg-param.svc-servers
+            repeat-item: server
+            properties: 
+              ip: $server.ip
+              port: $server.port
+              weight?: $server.weight
+              servicegroupname: $parent.properties.servicegroupname
+          -  
+            name: server-members-fqdn
+            type: ns::server
+            condition: $parameters.svg-param.svc-server-domains
+            repeat: $parameters.svg-param.svc-server-domains
+            repeat-item: server
+            repeat-condition: $server.add-server
+            properties: 
+              name: $server.domain + "-server"
+              domain: $server.domain
+          - 
+            name: svg-fqdn-members
+            type: ns::servicegroup_servicegroupmember_binding
+            condition: $parameters.svg-param.svc-server-domains
+            repeat: $parameters.svg-param.svc-server-domains
+            repeat-item: server
+            repeat-condition: $parameters.svg-param.svc-server-domains
+            properties: 
+              servername: $server.domain + "-server"
+              port: $server.port
+              weight?: $server.weight
+              servicegroupname: $parent.properties.servicegroupname
+          -
+            name: sslservicegroup-comp
+            type: ns::sslservicegroup
+            condition: $parameters.svg-param.ssl-config.svg-ssl-profile
+            properties:
+              servicegroupname: $parent.properties.servicegroupname
+              sslprofile: $parameters.svg-param.ssl-config.svg-ssl-profile
+      - 
+        name: existing-cert-bindings-comp
+        type: ns::sslvserver_sslcertkey_binding 
+        description: "This component binds and existing certkey entities to a vserver."
+        condition: $parameters.cert-sect.existing-certificate-name and $parameters.lb-service-type == str("SSL")
+        properties: 
+          vservername: $parent.properties.name
+          certkeyname: $parameters.cert-sect.existing-certificate-name
+      - 
+        name: vserver-certs-bindings
+        type: stlb::vserver-certs-binds
+        condition: $parameters.cert-sect.certificates and $parameters.lb-service-type == str("SSL") and not $parameters.cert-sect.existing-certificate-name
+        properties: 
+          certificates: $parameters.cert-sect.certificates
+          vserver-name: $parent.properties.name
+  -
+    name: tcp-monitor-svcg-binding-comp
+    condition:  $parameters.svg-param.monitor-list.tcp-mon
+    type: ns::servicegroup_lbmonitor_binding
+    properties:
+      servicegroupname: $components.lbvserver-comp.components.servicegroup-comp.properties.servicegroupname
+      monitor_name: tcp
+  -
+    name: ping-monitor-svcg-binding-comp
+    condition:  $parameters.svg-param.monitor-list.ping-mon
+    type: ns::servicegroup_lbmonitor_binding
+    properties:
+      servicegroupname: $components.lbvserver-comp.components.servicegroup-comp.properties.servicegroupname
+      monitor_name: ping
+  -
+    name: custom-adc-monitor-svcgs-binding-comp
+    type: ns::servicegroup_lbmonitor_binding   
+    condition: $parameters.svg-param.monitor-list.adv-mon.custom-adc-monitorname
+    repeat: $parameters.svg-param.monitor-list.adv-mon.custom-adc-monitorname
+    repeat-item: custom-mon
+    repeat-index: ndx
+    properties:
+      servicegroupname: $components.lbvserver-comp.components.servicegroup-comp.properties.servicegroupname
+      monitor_name: $custom-mon
+  -
+    name: monitors-comp
+    type: cmtypes::monitor-gts-09-02-2020   
+    condition: $parameters.svg-param.monitor-list.adv-mon.monitors
+    repeat: $parameters.svg-param.monitor-list.adv-mon.monitors
+    repeat-item: mon
+    repeat-index: ndx
+    description: "Builds a list of Citrix ADC monitor objects and binds them to the servicegroup of this LB config"
+    properties-default-sources:
+      - $mon
+    properties:
+        monitorname: $parameters.appname + "-" + $mon.monitorname + "-mon"
+        netprofile?: $parameters.netprofile-param
+    components:
+      -
+        name: monitor-svcg-binding-comp
+        condition:  $parameters.svg-param.svc-servers
+        type: ns::servicegroup_lbmonitor_binding
+        properties:
+          servicegroupname: $components.lbvserver-comp.components.servicegroup-comp.properties.servicegroupname
+          monitor_name: $parent.properties.monitorname
+  -
+    name: rewrite-config-comp
+    type: stlb::rewrite-config-gts-09-02-2020   
+    condition: $parameters.rewrite-config
+    properties-default-sources:
+      - $parameters
+    properties:
+      appname: $parameters.appname
+  -
+    name: rewrite-policies-bindings-comp
+    type: stlb::vserver-rewritepolicies-bindings
+    condition: $parameters.rewrite-config
+    properties:
+        vserver-name: $components.lbvserver-comp.properties.name
+        vserver-type: LBVSERVER
+        policies:
+          -
+            name: $components.rewrite-config-comp.outputs.rewrite-request-policy-label
+            type: POLICYLABEL
+            bind-point: REQUEST
+          -
+            name: $components.rewrite-config-comp.outputs.rewrite-response-policy-label
+            type: POLICYLABEL
+            bind-point: RESPONSE
+  -
+    name: responder-config-comp
+    type: stlb::responder-config-gts-09-02-2020   
+    condition: $parameters.responder-config
+    properties-default-sources:
+      - $parameters
+    properties:
+      appname: $parameters.appname
+  -
+    name: responder-policies-bindings-comp
+    type: stlb::vserver-responderpolicies-bindings
+    condition: $parameters.responder-config
+    properties:
+        vserver-name: $components.lbvserver-comp.properties.name
+        vserver-type: LBVSERVER
+        policies:
+          -
+            name: $components.responder-config-comp.outputs.responder-policy-label
+            type: POLICYLABEL
+            bind-point: REQUEST
+  -
+    name: sslvserver-comp
+    type: ns::sslvserver
+    condition: $parameters.ssl-config.ssl-profile
+    properties:
+      vservername: $components.lbvserver-comp.properties.name
+      sslprofile: $parameters.ssl-config.ssl-profile
+outputs: 
+  - 
+    name: lbvserver
+    value: $components.lbvserver-comp
+  - 
+    name: servicegroup
+    condition:  $parameters.svg-param.svc-servers or $parameters.svg-param.svc-server-domains
+    value: $components.lbvserver-comp.components.servicegroup-comp
+  - 
+    name: monitors
+    value: $components.monitors-comp

@@ -1,0 +1,120 @@
+--- 
+name: csvserver-params-gts-09-02-2020   
+namespace: com.citrix.adc.commontypes
+version: "1.0"
+description: "This stylebook defines the parameters for a content switching virtual server."
+private: true
+schema-version: "1.0"
+import-stylebooks:
+  - 
+    namespace: com.citrix.adc.commontypes
+    prefix: cmtypes
+    version: "1.0"
+parameters: 
+  - 
+    name: cs-virtual-port
+    label: "Content Switched App Virtual Port"
+    description: "TCP port representing the Content Switched application"
+    type: tcp-port
+    gui:
+      updatable: true
+    default: 443
+    required: true
+  - 
+    name: cs-service-type
+    label: "Content Switched App Protocol"
+    description: "Protocol used for the Content Switched application."
+    type: string
+    default: SSL    
+    required: true
+    gui:
+      updatable: true
+    allowed-values: 
+      - HTTP
+      - FTP
+      - TCP
+      - UDP
+      - SSL
+      - SSL_BRIDGE
+      - SSL_TCP
+      - DTLS
+      - NNTP
+      - DNS
+      - DHCPRA
+      - ANY
+      - SIP_UDP
+      - SIP_TCP
+      - SIP_SSL
+      - DNS_TCP
+      - RTSP
+      - PUSH
+      - SSL_PUSH
+      - RADIUS
+      - RDP
+      - MYSQL
+      - MSSQL
+      - DIAMETER
+      - SSL_DIAMETER
+      - TFTP
+      - ORACLE
+      - SMPP
+      - SYSLOGTCP
+      - SYSLOGUDP
+      - FIX
+      - SSL_FIX
+      - PROXY
+      - USER_TCP
+      - USER_SSL_TCP
+      - QUIC
+      - IPFIX
+      - LOGSTREAM
+      - MONGO
+      - MONGO_TLS
+  - 
+    name: redirect-url
+    label: "Load Balanced App URL Redirect"
+    description: "URL to which to redirect traffic if the virtual server becomes unavailable."
+    type: string
+    gui:
+      hidden: true
+  - 
+    name: backupvserver-param
+    label: "Backup Virtual Server HIDDEN"
+    description: "Traffic will be directed to this virtual server if load Balanced application down. | HIDDEN"
+    type: string
+    gui:
+      hidden: true
+  - 
+   name: netprofile-param
+   label: "Netprofile Name Paramaters HIDDEN"
+   description: "NetProfile to be used | HIDDEN"
+   type: string
+   gui:
+     hidden: true
+  - 
+    name: cs-advanced
+    label: "Advanced Content Switched App Settings"
+    description: "Advanced Content Switched App settings"
+    type: object
+    gui: 
+      collapse_pane: true  
+    parameters-default-sources:
+      - cmtypes::csvserver-advanced-params-gts-09-02-2020   
+  - 
+    name: default-lb-pool
+    label: "Content Switched App Default Server Pool"
+    description: "Details of the Default pool for this application."
+    type: object
+    parameters-default-sources:
+      - cmtypes::lbvserver-for-cs-params-gts-09-02-2020 
+      - cmtypes::services-params-gts-09-02-2020   
+      - cmtypes::certificate-param-gts-09-02-2020 
+      - cmtypes::rewrite-config-params-gts-09-02-2020   
+      - cmtypes::cs-responder-config-params-gts-09-02-2020 
+      - cmtypes::ssl-config-params-gts-09-02-2020  
+      - cmtypes::protection-param-gts-09-02-2020  
+  - 
+    name: pools
+    label: "Content Switched App Other Server Pools"
+    description: "Details of other server pools for the content switched application."
+    type: "cmtypes::cs-pool-gts-09-02-2020 []"

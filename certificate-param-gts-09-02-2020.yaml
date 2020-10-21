@@ -1,0 +1,32 @@
+--- 
+name: certificate-param-gts-09-02-2020   
+namespace: com.citrix.adc.commontypes
+version: "1.0"
+private: true
+display-name: "Certificate Parameters including existing certificate or upload new one"
+description: "This StyleBook defines Paramameters for SSL Certificate where you could use existing or upload new one"
+schema-version: "1.0"
+import-stylebooks: 
+  - 
+    namespace: com.citrix.adc.commontypes
+    prefix: cmtypes
+    version: "1.0"
+parameters: 
+  - 
+    name: cert-sect
+    label: "SSL Certificate Configuration"
+    description: "SSL Certificate Configuration. New certificate takes precendece over existing certificate if both are configured"
+    type: object
+    gui: 
+      collapse_pane: true    
+    parameters:
+      - 
+        name: existing-certificate-name
+        label: "existing-certificate"
+        description: "Name of the existing certificate to be used. Exact match required"
+        type: string
+      - 
+        name: certificates
+        label: "SSL Certificate Settings"
+        description: "Certificates for this virtual server if this load Balanced application is exposed using SSL"
+        type: "cmtypes::certificate[]"

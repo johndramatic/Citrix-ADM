@@ -1,0 +1,74 @@
+name: template-single-cs-lb-mon-full-gts-09-02-2020   
+namespace: com.citrix.adc.stylebooks
+version: "1.0"
+display-name: Single Port Content-Switching StyleBook with L7 Features
+description: |    
+    This StyleBook will be used to deploy CS Configuration with the ability    
+    to make use of rewrite or responder features of the Citrix ADC
+schema-version: "1.0"
+import-stylebooks: 
+  - 
+    namespace: netscaler.nitro.config
+    prefix: ns
+    version: "13.0" 
+  - 
+    namespace: com.citrix.adc.stylebooks
+    prefix: stlb
+    version: "1.0"
+  - 
+    namespace: com.citrix.adc.commontypes
+    prefix: cmtypes
+    version: "1.0"
+parameters-default-sources:
+    - cmtypes::app-params-gts-09-02-2020 
+    - cmtypes::csvserver-params-gts-09-02-2020 
+    - cmtypes::certificate-param-gts-09-02-2020 
+    - cmtypes::rewrite-config-params-gts-09-02-2020   
+    - cmtypes::cs-responder-config-params-gts-09-02-2020 
+    - cmtypes::ssl-config-params-gts-09-02-2020 
+    - cmtypes::cs-protection-param-gts-09-02-2020
+    - cmtypes::bot-profile-params-gts-09-02-2020 
+substitutions: 
+  lb-virtual-port(lb-virtual-port): if-then-else($lb-virtual-port == "*",str(ANY),str($lb-virtual-port))
+components:
+  - 
+    name: snip-be
+    type: ns::nsip
+    properties:
+      ipaddress: ip($parameters.lb-virtual-ip) + ip(0.0.2.0)
+      netmask: str(255.255.254.0)
+      type: snip
+  - 
+    name: netprof-comp
+    type: ns::netprofile
+    properties: 
+      name: $parameters.appname + "-netprof"
+      srcip: str($components.snip-be.properties.ipaddress)
+      srcippersistency: ENABLED     
+  - 
+    name: cs-mon-comps
+    type: stlb::cs-lb-mon-full-gts-09-02-2020   
+    description: "This list of components are used to generate CS Vservers (L7 rules supplied in parameters)"
+    properties-default-sources:
+      - $parameters
+    properties:
+        netprofile-param: $components.netprof-comp.properties.name
+        owner: str(template)
+  - 
+    name: app-sec-bot-policy-comp
+    type: stlb::bot-profile-gts-09-02-2020
+    description: This creates bot management profile and policy to protect application.
+    condition: $parameters.cs-service-type == str("SSL") OR $parameters.cs-service-type == str("HTTP")
+    properties-default-sources:
+      - $parameters
+    properties:
+      appname: $parameters.appname + "-" + $substitutions.lb-virtual-port($parameters.cs-virtual-port)
+    components:
+      -
+        name: cs-bot-policy-binding
+        type: ns::csvserver_botpolicy_binding
+        properties:
+          name: $components.cs-mon-comps.outputs.csvserver.properties.name
+          priority: 100
+          bindpoint: REQUEST
+          policyname: $parent.outputs.bot-policy-name

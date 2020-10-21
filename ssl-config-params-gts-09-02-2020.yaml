@@ -1,0 +1,24 @@
+name: ssl-config-params-gts-09-02-2020 
+namespace: com.citrix.adc.commontypes
+version: "1.0"
+display-name: SSL Config Parameters
+private: true
+schema-version: "1.0"
+import-stylebooks: 
+  - 
+    namespace: com.citrix.adc.commontypes
+    version: "1.0"
+    prefix: cmtypes
+parameters:
+    -
+        name: ssl-config
+        label: SSL Parameters Config Section (Please contact NetOPs for SSL Profile creation if you need advanced SSL Profile settings)
+        type: object
+        gui: 
+            collapse_pane: true  
+        parameters:
+          -
+            name: ssl-profile
+            label: SSL Profile Name
+            type: string
+            description: "Name of the VIP SSL Profile created for your application."

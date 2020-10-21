@@ -1,0 +1,97 @@
+--- 
+name: lb-mon-full-final-gts-09-02-2020   
+namespace: com.citrix.adc.stylebooks
+version: "1.0"
+display-name: Load Balancing StyleBook with L7 Features -gts-09-02-2020   
+private: true
+description: |    
+    This StyleBook builds on, and augments the lb-mon StyleBook by adding the ability    
+    to make use of rewrite, responder and SSL ciphers features of the Citrix ADC
+schema-version: "1.0"
+import-stylebooks:
+  - 
+    namespace: netscaler.nitro.config
+    prefix: ns
+    version: "13.0" 
+  - 
+    namespace: com.citrix.adc.stylebooks
+    prefix: stlb
+    version: "1.0"
+  - 
+    namespace: com.citrix.adc.commontypes
+    prefix: cmtypes
+    version: "1.0"
+parameters-default-sources:
+    - cmtypes::app-params-gts-09-02-2020 
+    - cmtypes::lbvserver-params-gts-09-02-2020   
+    - cmtypes::services-params-gts-09-02-2020   
+    - cmtypes::certificate-param-gts-09-02-2020 
+    - cmtypes::rewrite-config-params-gts-09-02-2020   
+    - cmtypes::responder-config-params-gts-09-02-2020 
+    - cmtypes::ssl-config-params-gts-09-02-2020  
+    - cmtypes::protection-param-gts-09-02-2020
+    - cmtypes::bot-profile-params-gts-09-02-2020
+substitutions: 
+  lb-virtual-port(lb-virtual-port): if-then-else($lb-virtual-port == "*",str(ANY),str($lb-virtual-port))
+components:
+  -
+    name: lb-config-comp-backup
+    type: stlb::lb-mon-full-gts-09-02-2020   
+    condition: $parameters.protection.backupvserver-param
+    properties-default-sources:
+      - $parameters.protection.backupvserver-param[0]
+    properties:
+      appname: $parameters.appname + "-" + $parameters.lb-service-type + "-" + $substitutions.lb-virtual-port($parameters.lb-virtual-port) + "-" + $parameters.owner + "-backupvserver"
+      lb-virtual-ip: 0.0.0.0
+      lb-virtual-port: 0
+      netprofile-param?: $parameters.netprofile-param
+  -
+    name: lb-config-comp-final-without-backup
+    type: stlb::lb-mon-full-gts-09-02-2020   
+    condition: not $parameters.protection.backupvserver-param
+    properties-default-sources:
+      - $parameters
+    properties:
+      appname: $parameters.appname + "-" + $parameters.lb-service-type + "-" + $substitutions.lb-virtual-port($parameters.lb-virtual-port) + "-" + $parameters.owner
+      redirect-url?: $parameters.protection.backup-redirecturl
+  -
+    name: lb-config-comp-final-with-backup
+    type: stlb::lb-mon-full-gts-09-02-2020   
+    condition: $parameters.protection.backupvserver-param
+    properties-default-sources:
+      - $parameters
+    properties:
+      appname: $parameters.appname + "-" + $parameters.lb-service-type + "-" + $substitutions.lb-virtual-port($parameters.lb-virtual-port) + "-" + $parameters.owner
+      backupvserver-param?: $components.lb-config-comp-backup.outputs.lbvserver.properties.name
+      redirect-url?: $parameters.protection.backup-redirecturl
+outputs: 
+  - 
+    name: lbvserver
+    value: if-then-else($parameters.protection.backupvserver-param,$components.lb-config-comp-final-with-backup.outputs.lbvserver.properties.name,$components.lb-config-comp-final-without-backup.outputs.lbvserver.properties.name)
+  - 
+    name: backup-lbvserver
+    value: lb-config-comp-backup.outputs.lbvserver.properties.name
+operations:
+  analytics:
+    -
+      name: lbvserver-without-backup-ops-comp
+      condition: ($parameters.lb-service-type == str("SSL") OR $parameters.lb-service-type == str("HTTP")) AND NOT $parameters.protection.backupvserver-param
+      properties:
+        target: $components.lb-config-comp-final-without-backup.outputs.lbvserver
+        filter: "true"
+        insights:
+          -
+            type: webinsight
+          -
+            type: securityinsight  
+    -
+      name: lbvserver-with-backup-ops-comp
+      condition: ($parameters.lb-service-type == str("SSL") OR $parameters.lb-service-type == str("HTTP")) AND $parameters.protection.backupvserver-param
+      properties:
+        target: $components.lb-config-comp-final-with-backup.outputs.lbvserver
+        filter: "true"
+        insights:
+          -
+            type: webinsight
+          -
+            type: securityinsight  

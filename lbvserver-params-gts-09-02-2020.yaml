@@ -1,0 +1,418 @@
+--- 
+name: lbvserver-params-gts-09-02-2020   
+namespace: com.citrix.adc.commontypes
+version: "1.0"
+description: "This stylebook defines the parameters for a load balancing virtual server."
+private: true
+schema-version: "1.0"
+import-stylebooks:
+  - 
+    namespace: com.citrix.adc.commontypes
+    prefix: cmtypes
+    version: "1.0"
+parameters: 
+  - 
+    name: lb-virtual-port
+    label: "Load Balanced App Virtual Port"
+    description: "TCP port representing the Load Balanced application"
+    type: tcp-port
+    required: true
+    gui:
+      updatable: true
+    default: 443
+  - 
+    name: lb-service-type
+    label: "Load Balanced App Protocol"
+    description: "Protocol used for the Load Balanced application."
+    type: string
+    default: SSL    
+    required: true
+    allowed-values: 
+      - HTTP
+      - FTP
+      - TCP
+      - UDP
+      - SSL
+      - SSL_BRIDGE
+      - SSL_TCP
+      - DTLS
+      - NNTP
+      - DNS
+      - DHCPRA
+      - ANY
+      - SIP_UDP
+      - SIP_TCP
+      - SIP_SSL
+      - DNS_TCP
+      - RTSP
+      - PUSH
+      - SSL_PUSH
+      - RADIUS
+      - RDP
+      - MYSQL
+      - MSSQL
+      - DIAMETER
+      - SSL_DIAMETER
+      - TFTP
+      - ORACLE
+      - SMPP
+      - SYSLOGTCP
+      - SYSLOGUDP
+      - FIX
+      - SSL_FIX
+      - PROXY
+      - USER_TCP
+      - USER_SSL_TCP
+      - QUIC
+      - IPFIX
+      - LOGSTREAM
+      - MONGO
+      - MONGO_TLS
+    gui:
+      updatable: true
+      dependent-parameters:
+#          -
+#              matching-values:
+#                  - SSL
+#                  - SSL_TCP
+#              target-parameter: $parameters.cert-sect
+#              action: show   
+          -
+              matching-values:
+                  - SSL
+              target-parameter: $parameters.responder-config.redirect-to-https
+              action: show     
+  - 
+    name: algorithm
+    label: "Load Balanced App Algorithm"
+    description: "Load Balancing algorithm for the application"
+    type: string
+    default: LEASTCONNECTION        
+    allowed-values: 
+      - LEASTCONNECTION
+      - ROUNDROBIN
+      - LEASTRESPONSETIME
+      - SOURCEIPHASH
+      - LEASTBANDWIDTH
+      - LEASTPACKETS
+      - LRTM
+      - DESTINATIONIPHASH
+      - SOURCEIPHASH
+      - SRCIPDESTIPHASH
+      - URLHASH
+      - DOMAINHASH
+      - CALLIDHASH
+      - TOKEN
+    gui:
+        dependent-parameters:
+            -
+                matching-values:
+                    - LEASTCONNECTION
+                    - ROUNDROBIN
+                    - LEASTRESPONSETIME
+                    - LEASTBANDWIDTH
+                    - LEASTPACKETS
+                target-parameter: $parameters.backuplbmethod
+                action: show
+#            -
+#                matching-values:
+#                    - LEASTCONNECTION
+#                    - ROUNDROBIN
+#                    - LEASTRESPONSETIME
+#                    - SOURCEIPHASH
+#                    - LEASTBANDWIDTH
+#                    - LEASTPACKETS
+#                target-parameter: $parameters.backuplbmethod
+#                action: set-value
+#                value: ROUNDROBIN
+            -
+                matching-values:
+                    - DESTINATIONIPHASH
+                    - SOURCEIPHASH
+                    - SRCIPDESTIPHASH
+                target-parameter: $parameters.netmask
+                action: show
+            -
+                matching-values:
+                    - DESTINATIONIPHASH
+                    - SOURCEIPHASH
+                    - SRCIPDESTIPHASH
+                target-parameter: $parameters.v6netmasklen
+                action: show
+            -
+                matching-values:
+                    - DESTINATIONIPHASH
+                    - SOURCEIPHASH
+                    - SRCIPDESTIPHASH
+                target-parameter: $parameters.netmask
+                action: set-value
+                value: 255.255.255.255
+            -
+                matching-values:
+                    - DESTINATIONIPHASH
+                    - SOURCEIPHASH
+                    - SRCIPDESTIPHASH
+                target-parameter: $parameters.v6netmasklen
+                action: set-value
+                value: 128
+            -
+                matching-values:
+                    - URLHASH
+                    - DOMAINHASH
+                target-parameter: $parameters.hashlength
+                action: show
+            -
+                matching-values:
+                    - URLHASH
+                    - DOMAINHASH
+                target-parameter: $parameters.hashlength
+                action: set-value
+                value: 80
+  - 
+    name: backuplbmethod
+    label: "Backup load balancing method"
+    description: "Backup load balancing method. Becomes operational if the primary load balancing method fails or cannot be used."
+    type: string   
+    default: ROUNDROBIN
+    allowed-values: 
+      - ROUNDROBIN
+      - LEASTCONNECTION
+      - LEASTRESPONSETIME
+      - SOURCEIPHASH
+      - LEASTBANDWIDTH
+      - LEASTPACKETS
+  - 
+    name: netmask
+    label: "IPv4 Netmask"
+    description: "IPv4 subnet mask to apply to the destination IP address or source IP address when the load balancing method is DESTINATIONIPHASH, SRCIPDESTIPHASH or SOURCEIPHASH."
+    type: string
+  - 
+    name: v6netmasklen
+    label: "IPv6 Mask Length"
+    description: "Number of bits to consider in an IPv6 destination or source IP address, for creating the hash that is required by the DESTINATIONIPHASH, SRCIPDESTIPHASH and SOURCEIPHASH load balancing methods."
+    type: number
+    min-value: 1
+    max-value: 128
+  - 
+    name: hashlength
+    label: "Hash Length"
+    description: "Number of bytes to consider for the hash value used in the URLHASH and DOMAINHASH load balancing methods."
+    type: number
+    min-value: 1
+    max-value: 4096
+  - 
+    name: redirect-url
+    label: "Load Balanced App URL Redirect"
+    description: "URL to which to redirect traffic if the virtual server becomes unavailable."
+    type: string
+    gui:
+      hidden: true
+  - 
+    name: backupvserver-param
+    label: "Backup Virtual Server HIDDEN"
+    description: "Traffic will be directed to this virtual server if load Balanced application down. | HIDDEN"
+    type: string
+    gui:
+      hidden: true
+  - 
+   name: netprofile-param
+   label: "Netprofile Name Paramaters HIDDEN"
+   description: "NetProfile to be used | HIDDEN"
+   type: string
+   gui:
+     hidden: true
+  -
+    name: persistence-parameter
+    label: "Persistence Parameters"
+    type: object
+    required: true
+    parameters:
+        - 
+            name: persistence
+            label: "Load Balanced App Persistence Type"
+            description: "Persistence type used for members of this pool"
+            type: string
+#            default: SRCIPDESTIP
+            allowed-values: 
+                - NONE
+                - SOURCEIP
+                - COOKIEINSERT
+                - SSLSESSION
+                - RULE
+                - URLPASSIVE
+                - DESTIP
+                - SRCIPDESTIP
+                - CALLID
+                - RTSPSID
+                - DIAMETER
+                - FIXSESSION
+                - USERSESSION
+            gui:
+                 dependent-parameters:
+                     -
+                         matching-values:
+                             - SOURCEIP
+                             - DESTIP
+                             - SRCIPDESTIP
+                         target-parameter: $parameters.persistence-parameter.persistmask
+                         action: show    
+                     -
+                         matching-values:
+                             - SOURCEIP
+                             - DESTIP
+                             - SRCIPDESTIP
+                         target-parameter: $parameters.persistence-parameter.v6persistmasklen
+                         action: show  
+                     -
+                         matching-values:
+                             - SOURCEIP
+                             - DESTIP
+                             - SRCIPDESTIP
+                         target-parameter: $parameters.persistence-parameter.persistmask
+                         action: set-value
+                         value: 255.255.255.255   
+                     -
+                         matching-values:
+                             - SOURCEIP
+                             - DESTIP
+                             - SRCIPDESTIP
+                         target-parameter: $parameters.persistence-parameter.v6persistmasklen
+                         action: set-value
+                         value: 128          
+                     -
+                         matching-values:
+                             - COOKIEINSERT
+                         target-parameter: $parameters.persistence-parameter.cookiename
+                         action: show  
+                     -
+                         matching-values:
+                             - COOKIEINSERT
+                             - RULE
+                             - SSLSESSION
+                         target-parameter: $parameters.persistence-parameter.persistence-backup
+                         action: show    
+#                     -
+#                         matching-values:
+#                             - COOKIEINSERT
+#                             - RULE
+#                             - SSLSESSION
+#                         target-parameter: $parameters.persistence-parameter.persistence-backup
+#                         action: set-value
+#                         value: NONE                
+                     -
+                         matching-values:
+                             - RULE
+                         target-parameter: $parameters.persistence-parameter.rule-expression
+                         action: show   
+                     -
+                         matching-values:
+                             - RULE
+                         target-parameter: $parameters.persistence-parameter.resrule-expression
+                         action: show
+                     -
+                         matching-values:
+                             - RULE
+                         target-parameter: $parameters.persistence-parameter.rule-expression
+                         action: set-value
+                         value: none
+                     -
+                         matching-values:
+                             - RULE
+                         target-parameter: $parameters.persistence-parameter.resrule-expression
+                         action: set-value
+                         value: none
+        -   
+            name: rule-expression
+            label: "Rule expression"
+            description: "IPv4 subnet mask to apply to the destination IP address or source IP address when the load balancing method is DESTINATIONIPHASH, SRCIPDESTIPHASH or SOURCEIPHASH.Expression, or name of a named expression, against which traffic is evaluated. The following requirements apply only to the Citrix ADC CLI \r\n * If the expression includes one or more spaces, enclose the entire expression in double quotation marks. \r\n * If the expression itself includes double quotation marks, escape the quotations by using the character. \r\n * Alternatively, you can use single quotation marks to enclose the rule, in which case you do not have to escape the double quotation marks."
+            type: string
+        -   
+            name: resrule-expression
+            label: "Response Expression"
+            description: "Expression specifying which part of a server's response to use for creating rule based persistence sessions (persistence type RULE). Can be either an expression or the name of a named expression."
+            type: string
+        - 
+            name: timeout
+            label: "Load Balanced App Persistence Timeout (mins)"
+            description: "Time period for which a persistence session is in effect."
+            type: number
+            default: 2
+            min-value: 0
+            max-value: 1440
+        - 
+            name: persistmask
+            label: "IPv4 Netmask"
+            description: "Persistence mask for IP based persistence types, for IPv4 virtual servers."
+            type: string
+        - 
+            name: v6persistmasklen
+            label: "IPv6 Mask Length"
+            description: "Persistence mask for IP based persistence types, for IPv6 virtual servers."
+            type: number
+            min-value: 1
+            max-value: 128
+        - 
+            name: persistence-backup
+            label: "Load Balanced App Backup Persistence"
+            description: "Backup persistence type for the virtual server."
+            type: string
+            allowed-values: 
+            - NONE
+            - SOURCEIP
+            gui:
+                 dependent-parameters:
+                     -
+                         matching-values:
+                             - SOURCEIP
+                         target-parameter: $parameters.persistence-parameter.persistmask
+                         action: show
+                     -
+                         matching-values:
+                             - SOURCEIP
+                         target-parameter: $parameters.persistence-parameter.v6persistmasklen
+                         action: show
+                     -
+                         matching-values:
+                             - SOURCEIP
+                         target-parameter: $parameters.persistence-parameter.persistmask
+                         action: set-value
+                         value: 255.255.255.255
+                     -
+                         matching-values:
+                             - SOURCEIP
+                         target-parameter: $parameters.persistence-parameter.v6persistmasklen
+                         action: set-value
+                         value: 128
+                     -
+                         matching-values:
+                             - SOURCEIP
+                         target-parameter: $parameters.persistence-parameter.backup-persistence-timeout
+                         action: show
+                     -
+                         matching-values:
+                             - SOURCEIP
+                         target-parameter: $parameters.persistence-parameter.backup-persistence-timeout
+                         action: set-value
+                         value: 2
+        - 
+            name: backup-persistence-timeout
+            label: "Load Balanced App Backup Persistence Timeout"
+            description: "Time period for which backup persistence is in effect."
+            type: number
+            min-value: 2
+            max-value: 1440
+        -
+            name: cookiename
+            label: "Cookie name to be use with cookie insert persistance"
+            description: "Use this parameter to specify the cookie name for COOKIE peristence type. It specifies the name of cookie with a maximum of 32 characters. If not specified, cookie name is internally generated."
+            type: string
+  - 
+    name: lb-advanced
+    label: "Advanced Load Balancer Settings"
+    description: "Advanced load balancer settings"
+    type: object
+    gui: 
+      collapse_pane: true    
+    parameters-default-sources:
+      - cmtypes::vserver-advanced-params-gts-09-02-2020   
+ 

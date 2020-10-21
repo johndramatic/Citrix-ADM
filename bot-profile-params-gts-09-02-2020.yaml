@@ -1,0 +1,172 @@
+name: bot-profile-params-gts-09-02-2020   
+namespace: com.citrix.adc.commontypes
+version: "1.0"
+private: true
+display-name: StyleBook contains the parameters of an bot profile
+description: StyleBook contains the parameters of an bot profile
+schema-version: "1.0"
+parameters:
+  -
+    name: application-security
+    label: Application Security
+    type: object
+    parameters:
+      -
+        name: enable-ipreputation
+        label: Enable IP Reputation Check
+        description: Examines if the incoming bot traffic is from a malicious IP address. Protect your application against requests from disreputable sources IPs.
+        type: object
+        parameters:
+          -
+            name: ip-reputation
+            label: Configure Categories
+            type: object[]
+            parameters:
+              -
+                name: block-bycategory
+                label: Type
+                description: |
+                    This creates and Bot profile to block requests from IPs of specific categories.
+                    IP Repuation category. Following IP Reuputation categories are allowed: 
+                    *IP_BASED - This category checks whether client IP is malicious or not. 
+                    *BOTNET - This category includes Botnet C;C channels, and infected zombie machines controlled by Bot master. 
+                    *SPAM_SOURCES - This category includes tunneling spam messages through a proxy, anomalous SMTP activities, and forum spam activities. *SCANNERS - This category includes all reconnaissance such as probes, host scan, domain scan, and password brute force attack. *DOS - This category includes DOS, DDOS, anomalous sync flood, and anomalous traffic detection. 
+                    *REPUTATION - This category denies access from IP addresses currently known to be infected with malware. This category also includes IPs with average low Webroot Reputation Index score. Enabling this category will prevent access from sources identified to contact malware distribution points. 
+                    *PHISHING - This category includes IP addresses hosting phishing sites and other kinds of fraud activities such as ad click fraud or gaming fraud. 
+                    *PROXY - This category includes IP addresses providing proxy services. 
+                    *NETWORK - IPs providing proxy and anonymization services including The Onion Router aka TOR or darknet. 
+                    *MOBILE_THREATS - This category checks client IP with the list of IPs harmful for mobile devices.
+                type: string
+                allowed-values:
+                  - IP
+                  - SPAM_SOURCES
+                  - BOTNETS
+                  - SCANNERS
+                  - DOS
+                  - REPUTATION
+                  - PHISHING
+                  - PROXY
+                  - NETWORK
+                  - MOBILE_THREATS
+              -
+                name: ip-reputation-enabled
+                label: Enabled
+                description: Enable or disable logging for IP Reputation.
+                type: string
+                default: "ON"
+                allowed-values:
+                    - "ON"
+                    - "OFF"
+              -
+                name: block-bycategory-action
+                label: Action
+                description: One or more actions to be taken if bot is detected based on this IP Reputation binding. Only LOG action can be combinded with DROP, RESET, REDIRECT or MITIGATION action.
+                type: string
+                default: RESET
+                gui:
+                    layout: radio
+                allowed-values:
+                  - NONE
+                  - DROP
+                  - RESET
+              -
+                name: ip-reputation-comments
+                label: Comments
+                description: A brief description about the IP-reputation configuration.
+                type: string        
+      -
+        name: enable-bot-signatures
+        label: Enable BOT signatures
+        description: This enables Bot Profile to block request matching Bot signatures.
+        type: object
+        parameters:
+          -
+            name: signaturename
+            description: Name of the existing BOT Signature. Note that Signature name should match with the BOT Signature name on ADC that is available by now.
+            label: Signature Name
+            default: default_bot_management_sig.json
+            type: string
+      -
+        name: enable-allow-bot-list
+        label: Allow List
+        description: A customized list of IP addresses, subnets, and policy expressions that can be bypassed as a white list. This enables Bot profile to bypass request from known IPv4 or subnet address.
+        type: object
+        parameters:
+          -
+            name: allow-list
+            label: Allow IPv4 or Subnet (CIDR) addresses
+            type: object[]
+            parameters:
+              - 
+                name: allow-list-type
+                label: Type
+                type: string
+                allowed-values:
+                    - IPv4
+                    - SUBNET
+                    - EXPRESSION
+              -
+                name: allow-list-enabled
+                label: Enabled
+                description: Enable or disable logging for IP Reputation.
+                type: string
+                allowed-values:
+                    - "ON"
+                    - "OFF"
+              -
+                name: allow-list-value
+                label: IPv4 or Subnet (CIDR) address
+                type: string
+              -
+                name: allow-list-comments
+                label: Comments
+                description: A brief description about the IP-reputation configuration.
+                type: string  
+      -
+        name: enable-deny-bot-list
+        label: Deny List
+        description: A customized list of IP addresses, subnets, and policy expressions that has to be blocked from accessing your web applications. This enables Bot profile to DROP request from known bad IPv4 or Subnet address.
+        type: object
+        parameters:
+          -
+            name: deny-list
+            label: Deny IPv4 or Subnet (CIDR) addresses
+            type: object[]
+            parameters:
+              - 
+                name: deny-list-type
+                label: Type
+                type: string
+                allowed-values:
+                    - IPv4
+                    - SUBNET
+                    - EXPRESSION
+              -
+                name: deny-list-enabled
+                label: Enabled
+                description: Enable or disable logging for IP Reputation.
+                type: string
+                allowed-values:
+                    - "ON"
+                    - "OFF"
+              -
+                name: deny-list-value
+                label: IPv4 or Subnet (CIDR) address
+                type: string
+              -
+                name: deny-list-action
+                label: Action
+                type: string
+                default: RESET
+                gui:
+                    layout: radio
+                allowed-values:
+                  - DROP
+                  - RESET
+
+              -
+                name: deny-list-comments
+                label: Comments
+                description: A brief description about the IP-reputation configuration.
+                type: string  
+

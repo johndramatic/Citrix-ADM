@@ -1,0 +1,231 @@
+name: rewrite-config-gts-09-02-2020   
+namespace: com.citrix.adc.stylebooks
+version: "1.0"
+display-name: Rewrite Config StyleBook
+description: Rewrite |    
+    This StyleBook contains the different rewrite configuration that can be applied to traffic by Citrix ADC
+private: true
+schema-version: "1.0"
+import-stylebooks: 
+  - 
+    namespace: netscaler.nitro.config
+    version: "13.0"
+    prefix: ns
+  - 
+    namespace: com.citrix.adc.stylebooks
+    version: "1.0"
+    prefix: stlb
+  - 
+    namespace: com.citrix.adc.commontypes
+    version: "1.0"
+    prefix: cmtypes
+parameters:
+    -
+        name: appname
+        type: string
+        required: true
+parameters-default-sources:
+    - cmtypes::rewrite-config-params-gts-09-02-2020   
+substitutions:
+    bindpoint:
+        false: REQUEST
+        true: RESPONSE
+    remove_headers_index: len($parameters.rewrite-config.new-headers)
+    replace_headers_index: $substitutions.remove_headers_index + len($parameters.rewrite-config.remove-headers)
+    replace_path_index: $substitutions.replace_headers_index + len($parameters.rewrite-config.replace-headers)
+    replace_content_index: $substitutions.replace_path_index + 1
+components:
+  # -
+  #   name: rewrite-enable-feature-comp
+  #   type: ns::nsfeature
+  #   description: Enables the REWRITE feature on Citrix ADC
+  #   meta-properties:
+  #       action: enable
+  #   properties:
+  #       feature: ["rewrite"]
+  - 
+    name: rewrite-request-policy-label-comp
+    type: ns::rewritepolicylabel
+    description: The rewrite request policy label to which all rewrite policies (for requests) are bound
+    properties: 
+      labelname: $parameters.appname + "-request-rewritepolicylabel"
+      transform: HTTP_REQ
+  - 
+    name: rewrite-response-policy-label-comp
+    type: ns::rewritepolicylabel
+    description: The rewrite response policy label to which all rewrite policies (for responses) are bound
+    properties: 
+      labelname: $parameters.appname + "-response-rewritepolicylabel"
+      transform: HTTP_RES
+  -
+    name: insert-headers-comp
+    type: stlb::insert-header-gts-09-02-2020 
+    condition: $parameters.rewrite-config.new-headers
+    repeat: $parameters.rewrite-config.new-headers
+    repeat-item: header
+    repeat-index: index
+    properties:
+        appname: $parameters.appname
+        header: $header
+    components:
+      -
+        name: rewritepolicy-request-rewritepolicylabel-binding-comp
+        type: ns::rewritepolicylabel_rewritepolicy_binding
+        condition: $substitutions.bindpoint[$header.on-response] == REQUEST
+        description: Binds the request policy created in the parent component to the request policy label
+        properties:
+            labelname: $components.rewrite-request-policy-label-comp.properties.labelname
+            policyname: $parent.outputs.insert-header-policy.properties.name
+            gotopriorityexpression: END
+            priority: $header.priority
+      -
+        name: rewritepolicy-response-rewritepolicylabel-binding-comp
+        type: ns::rewritepolicylabel_rewritepolicy_binding
+        condition: $substitutions.bindpoint[$header.on-response] == RESPONSE
+        description: Binds the response policy created in the parent component to the response policy label
+        properties:
+            labelname: $components.rewrite-response-policy-label-comp.properties.labelname
+            policyname: $parent.outputs.insert-header-policy.properties.name
+            gotopriorityexpression: END
+            priority: $header.priority
+  -
+    name: remove-headers-comp
+    type: stlb::remove-header-gts-09-02-2020 
+    condition: $parameters.rewrite-config.remove-headers
+    repeat: $parameters.rewrite-config.remove-headers
+    repeat-item: header
+    repeat-index: index
+    properties:
+        appname: $parameters.appname
+        header: $header
+    components:
+      -
+        name: rewritepolicy-request-rewritepolicylabel-binding-comp
+        type: ns::rewritepolicylabel_rewritepolicy_binding
+        condition: $substitutions.bindpoint[$header.on-response] == REQUEST
+        description: Binds the request policy created in the parent component to the request policy label
+        properties:
+            labelname: $components.rewrite-request-policy-label-comp.properties.labelname
+            policyname: $parent.outputs.remove-header-policy.properties.name
+            gotopriorityexpression: END
+            priority: $header.priority
+      -
+        name: rewritepolicy-response-rewritepolicylabel-binding-comp
+        type: ns::rewritepolicylabel_rewritepolicy_binding
+        condition: $substitutions.bindpoint[$header.on-response] == RESPONSE
+        description: Binds the response policy created in the parent component to the response policy label
+        properties:
+            labelname: $components.rewrite-response-policy-label-comp.properties.labelname
+            policyname: $parent.outputs.remove-header-policy.properties.name
+            gotopriorityexpression: END
+            priority: $header.priority
+
+  -
+    name: replace-headers-comp
+    type: stlb::replace-header-gts-09-02-2020 
+    condition: $parameters.rewrite-config.replace-headers
+    repeat: $parameters.rewrite-config.replace-headers
+    repeat-item: header
+    repeat-index: index
+    properties:
+        appname: $parameters.appname
+        header: $header
+    components:
+      -
+        name: rewritepolicy-request-rewritepolicylabel-binding-comp
+        type: ns::rewritepolicylabel_rewritepolicy_binding
+        condition: $substitutions.bindpoint[$header.on-response] == REQUEST
+        description: Binds the request policy created in the parent component to the request policy label
+        properties:
+            labelname: $components.rewrite-request-policy-label-comp.properties.labelname
+            policyname: $parent.outputs.replace-header-policy.properties.name
+            gotopriorityexpression: END
+            priority: $header.priority
+      -
+        name: rewritepolicy-response-rewritepolicylabel-binding-comp
+        type: ns::rewritepolicylabel_rewritepolicy_binding
+        condition: $substitutions.bindpoint[$header.on-response] == RESPONSE
+        description: Binds the response policy created in the parent component to the response policy label
+        properties:
+            labelname: $components.rewrite-response-policy-label-comp.properties.labelname
+            policyname: $parent.outputs.replace-header-policy.properties.name
+            gotopriorityexpression: END
+            priority: $header.priority
+  -
+    name: replace-path-comp
+    type: stlb::replace-path-gts-09-02-2020 
+    condition: $parameters.rewrite-config.replace-path
+    repeat: $parameters.rewrite-config.replace-path
+    repeat-item: rew
+    repeat-index: rew-index
+    properties:
+        appname: $parameters.appname + "-pr-" + str($rew.priority)
+        path: $rew
+    components:
+      -
+        name: rewritepolicy-request-rewritepolicylabel-binding-comp
+        type: ns::rewritepolicylabel_rewritepolicy_binding
+        description: Binds the request policy created in the parent component to the request policy label
+        properties:
+            labelname: $components.rewrite-request-policy-label-comp.properties.labelname
+            policyname: $parent.outputs.replace-path-policy.properties.name
+            gotopriorityexpression: END
+            priority: $rew.priority
+  -
+    name: advanced-rewrite-comp
+    type: stlb::advanced-rewrite-gts-09-02-2020 
+    condition: $parameters.rewrite-config.advanced-rewrite
+    repeat: $parameters.rewrite-config.advanced-rewrite
+    repeat-item: rew
+    repeat-index: rew-index
+    properties:
+        appname: $parameters.appname + "-pr-" + str($rew.priority)
+        advanced-rewrite: $rew
+    components:
+     -
+        name: rewritepolicy-request-rewritepolicylabel-binding-comp
+        type: ns::rewritepolicylabel_rewritepolicy_binding
+        condition: $substitutions.bindpoint[$rew.on-response] == REQUEST
+        description: Binds the request policy created in the parent component to the request policy label
+        properties:
+            labelname: $components.rewrite-request-policy-label-comp.properties.labelname
+            policyname: $parent.outputs.advanced-rewrite-policy.properties.name
+            gotopriorityexpression: END
+            priority: $rew.priority
+     -
+        name: rewritepolicy-response-rewritepolicylabel-binding-comp
+        type: ns::rewritepolicylabel_rewritepolicy_binding
+        condition: $substitutions.bindpoint[$rew.on-response] == RESPONSE
+        description: Binds the response policy created in the parent component to the response policy label
+        properties:
+            labelname: $components.rewrite-response-policy-label-comp.properties.labelname
+            policyname: $parent.outputs.advanced-rewrite-policy.properties.name
+            gotopriorityexpression: END
+            priority: $rew.priority
+  -
+    name: replace-content-comp
+    type: stlb::replace-content-gts-09-02-2020 
+    condition: $parameters.rewrite-config.replace-content
+    repeat: $parameters.rewrite-config.replace-content
+    repeat-item: content-item
+    repeat-index: content-index
+    properties:
+        appname: $parameters.appname + "-pr-" + str($content-item.priority)
+        content-config: $content-item
+    components:
+      -
+        name: rewritepolicy-request-rewritepolicylabel-binding-comp
+        type: ns::rewritepolicylabel_rewritepolicy_binding
+        description: Binds the request policy created in the parent component to the request policy label
+        properties:
+            labelname: $components.rewrite-response-policy-label-comp.properties.labelname
+            policyname: $parent.outputs.replace-content-policy.properties.name
+            gotopriorityexpression: END
+            priority: $content-item.priority
+outputs:
+  -
+    name: rewrite-request-policy-label
+    value: $components.rewrite-request-policy-label-comp.properties.labelname
+  -
+    name: rewrite-response-policy-label
+    value: $components.rewrite-response-policy-label-comp.properties.labelname

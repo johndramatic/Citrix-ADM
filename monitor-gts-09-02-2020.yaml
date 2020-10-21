@@ -1,0 +1,249 @@
+--- 
+name: monitor-gts-09-02-2020   
+namespace: com.citrix.adc.commontypes
+version: "1.0"
+private: true
+display-name: "LB Monitor"
+description: "This StyleBook defines a LB Monitor type."
+schema-version: "1.0"
+import-stylebooks: 
+  - 
+    namespace: netscaler.nitro.config
+    version: "13.0"
+    prefix: ns
+parameters: 
+    - 
+      name: monitorname
+      label: "Monitor Name"
+      description: "Name of the monitor"
+      type: string
+      required: true
+    -
+      name: type
+      label: "Monitor Type"
+      description: "Type of the monitor"
+      type: string
+      required: true
+      allowed-values:
+        - HTTP
+        - HTTP-ECV
+        - HTTP-INLINE
+        - TCP
+        - TCP-ECV
+      gui:
+          dependent-parameters:
+            -
+                matching-values:
+                    - HTTP
+                    - HTTP-INLINE
+                target-parameter: $parameters.respcodes
+                action: show
+            -
+                matching-values:
+                    - HTTP
+                    - HTTP-ECV
+                target-parameter: $parameters.customheaders
+                action: show
+            -
+                matching-values:
+                    - HTTP
+                    - HTTP-INLINE
+                target-parameter: $parameters.httprequest
+                action: show
+            -
+                matching-values:
+                    - HTTP
+                    - HTTP-INLINE
+                target-parameter: $parameters.httprequest
+                action: set-value
+                value: "HEAD /"
+            -
+                matching-values:
+                    - HTTP-ECV
+                    - TCP-ECV
+                target-parameter: $parameters.send
+                action: show
+            -
+                matching-values:
+                    - HTTP-ECV
+                    - TCP-ECV
+                target-parameter: $parameters.recv
+                action: show
+            -
+                matching-values:
+                    - HTTP-INLINE
+                target-parameter: $parameters.action
+                action: show
+    -
+      name: interval
+      label: "Interval"
+      description: "Time interval between two successive probes. Must be greater than the value of Response Time-out."
+      type: number
+      default: 5
+      min-value: 1
+      max-value: 20940
+      required: false
+    -
+      name: interval_units
+      label: "Interval Units"
+      description: "Monitor interval units."
+      type: string
+      default: SEC
+      allowed-values:
+        - SEC
+        - MSEC
+        - MIN
+    -
+      name: resptimeout
+      label: "Response Time-out"
+      description: "Response Timeout in seconds."
+      type: number
+      default: 2
+      min-value: 1
+      max-value: 20939      
+    -
+      name: resptimeoutunits
+      label: "Response Time-out Units"
+      description: "Monitor response timeout units."
+      type: string
+      default: SEC
+      allowed-values:
+        - SEC
+        - MSEC
+        - MIN
+    -
+      name: respcodes
+      label: "List of HTTP Status Response Code"
+      description: "Expected HTTP Status Response Code"
+      type: string[]
+    -
+      name: customheaders
+      label: "Custom HTTP Headers"
+      description: "custom HTTP Headers to send in monitor probe requests"
+      type: string
+    -
+      name: httprequest
+      label: "HTTP Request"
+      description: "HTTP Request sent by the monitor"
+      type: string
+    -
+      name: action
+      label: "Action"
+      description: 'Action to perform when the response to an inline monitor (a monitor of type HTTP-INLINE) indicates that the service is down. A service monitored by an inline monitor is considered DOWN if the response code is not one of the codes that have been specified for the Response Code parameter.
+        Available settings function as follows
+        * NONE - Do not take any action. However, the show service command and the show lb monitor command indicate the total number of responses that were checked and the number of consecutive error responses received after the last successful probe. \n
+        * LOG - Log the event in NSLOG or SYSLOG.
+        * DOWN - Mark the service as being down, and then do not direct any traffic to the service until the configured down time has expired. Persistent connections to the service are terminated as soon as the service is marked as DOWN. Also, log the event in NSLOG or SYSLOG.'
+      type: string
+      default: DOWN
+      allowed-values:
+        - NONE
+        - LOG
+        - DOWN
+    -
+      name: send
+      label: "Send String"
+      description: "String to send to the service. Applicable to TCP-ECV, HTTP-ECV, and UDP-ECV monitors."
+      type: string
+    -
+      name: recv
+      label: "Receive  String"
+      description: "String expected from the server for the service to be marked as UP. Applicable to TCP-ECV, HTTP-ECV, and UDP-ECV monitors."
+      type: string
+    -
+      name: secure
+      label: "Enable Secure mode for the monitor"
+      description: "Use a secure SSL connection when monitoring a service."
+      type: string
+      default: "NO"
+      allowed-values:
+        - "YES"
+        - "NO"
+    -
+      name: destip
+      label: "Destination IP"
+      description: "Destination IP to be monitored. Leave blank to use service ip as destination."
+      type: ipaddress
+    -
+      name: destport
+      label: "Destination Port"
+      description: "Destination Port to be monitored. Leave blank to use service port as destination."
+      type: tcp-port
+    -
+      name: downtime
+      label: "Down Time"
+      description: "Time duration for which to wait before probing a service that has been marked as DOWN. Expressed in milliseconds, seconds, or minutes."
+      default: 30
+      min-value: 1
+      max-value: 20939
+      type: number
+    -
+      name: downtimeunits
+      label: "Response downtime Units"
+      description: "Unit of measurement for the Down Time parameter. Cannot be changed after the monitor is created."
+      type: string
+      allowed-values:
+        - SEC
+        - MSEC
+        - MIN
+      default: SEC
+    -
+      name: retries
+      label: "Number of retries"
+      description: "Maximum number of probes to send to establish the state of a service for which a monitoring probe failed."
+      type: number 
+      default: 3
+      min-value: 1
+      max-value: 127
+    -
+      name: failureretries
+      label: "Failure Retries"
+      description: "Number of retries that must fail, out of the number specified for the Retries parameter, for a service to be marked as DOWN. For example, if the Retries parameter is set to 10 and the Failure Retries parameter is set to 6, out of the ten probes sent, at least six probes must fail if the service is to be marked as DOWN. The default value of 0 means that all the retries must fail if the service is to be marked as DOWN."
+      type: number 
+      min-value: 0
+      max-value: 32
+    -
+      name: lrtm
+      label: "Enable LRTM mode for the monitor"
+      description: "Enables the Least-Response-Time mode for the monitor used for load-balancing."
+      type: string
+      allowed-values:
+        - ENABLED
+        - DISABLED
+    - 
+      name: netprofile
+      label: "Monitor Netprofile HIDDEN"
+      description: "Monitor Netprofile HIDDEN"
+      default: hidden
+      type: string 
+      gui:
+        hidden: true
+components:
+  -
+    name: monitor
+    type: ns::lbmonitor
+    properties:
+        monitorname: $parameters.monitorname
+        type: $parameters.type
+        destip?: $parameters.destip
+        destport?: $parameters.destport
+        httprequest?: $parameters.httprequest
+        send?: $parameters.send
+        customheaders?: $parameters.customheaders
+        respcode?: $parameters.respcodes
+        recv?: $parameters.recv
+        lrtm?: $parameters.lrtm
+        secure?: $parameters.secure
+        interval?: $parameters.interval
+        units3?: $parameters.interval_units
+        resptimeout?: $parameters.resptimeout
+        units4?: $parameters.resptimeoutunits
+        downtime?: $parameters.downtime
+        units2?: $parameters.downtimeunits
+        retries?: $parameters.retries
+        failureretries?: $parameters.failureretries
+        netprofile?: $parameters.netprofile
+outputs:
+  -
+    name: monitor
+    value: $components.monitor

@@ -1,0 +1,39 @@
+--- 
+name: protection-param-gts-09-02-2020   
+namespace: com.citrix.adc.commontypes
+version: "1.0"
+private: true
+display-name: "Protection parameters needed for backup VSERVER of an LB"
+description: "This StyleBook defines protection paramameters of an LB"
+schema-version: "1.0"
+import-stylebooks: 
+  - 
+    namespace: com.citrix.adc.commontypes
+    prefix: cmtypes
+    version: "1.0"
+parameters: 
+  - 
+    name: protection
+    label: "Protection Configuration"
+    description: "Protection Configuration"
+    type: object
+    gui: 
+      collapse_pane: true    
+    parameters:
+      - 
+        name: backupvserver-param
+        label: "Backup Virtual Server"
+        description: "Traffic will be directed to this virtual server if load Balanced application down"
+        type: object[]
+        max-items: 1
+        parameters-default-sources:
+            - cmtypes::lbvserver-params-gts-09-02-2020
+            - cmtypes::services-params-gts-09-02-2020   
+            - cmtypes::certificate-param-gts-09-02-2020 
+            - cmtypes::rewrite-config-params-gts-09-02-2020   
+            - cmtypes::cs-responder-config-params-gts-09-02-2020 
+            - cmtypes::ssl-config-params-gts-09-02-2020  
+      - name: backup-redirecturl
+        label: "Redirect URL"
+        description: "URL to which to redirect traffic if the virtual server becomes unavailable."
+        type: string

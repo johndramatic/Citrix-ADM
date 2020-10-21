@@ -1,0 +1,200 @@
+name: cs-lb-mon-full-gts-09-02-2020   
+namespace: com.citrix.adc.stylebooks
+version: "1.0"
+display-name: Content-Switching StyleBook with L7 Features
+description: |    
+    This StyleBook will be used to deploy CS Configuration with the ability    
+    to make use of rewrite or responder features of the Citrix ADC
+private: true
+schema-version: "1.0"
+import-stylebooks: 
+  - 
+    namespace: netscaler.nitro.config
+    prefix: ns
+    version: "13.0" 
+  - 
+    namespace: com.citrix.adc.stylebooks
+    prefix: stlb
+    version: "1.0"
+  - 
+    namespace: com.citrix.adc.commontypes
+    prefix: cmtypes
+    version: "1.0"
+parameters-default-sources:
+    - cmtypes::app-params-gts-09-02-2020 
+    - cmtypes::csvserver-params-gts-09-02-2020 
+    - cmtypes::certificate-param-gts-09-02-2020 
+    - cmtypes::rewrite-config-params-gts-09-02-2020   
+    - cmtypes::cs-responder-config-params-gts-09-02-2020 
+    - cmtypes::ssl-config-params-gts-09-02-2020 
+    - cmtypes::cs-protection-param-gts-09-02-2020   
+substitutions: 
+  fill-appowner(owner): if-then-else($owner,$owner,str(APP_Owner_DEFAULT))    
+components:
+  - 
+    name: csvserver-comp
+    type: ns::csvserver
+    properties: 
+      name: $parameters.appname + "-" + $parameters.cs-service-type + "-" + str($parameters.cs-virtual-port) + "-" + $substitutions.fill-appowner($parameters.owner) + "-cs"
+      servicetype: $parameters.cs-service-type
+      ipv46: $parameters.lb-virtual-ip
+      port?: $parameters.cs-virtual-port
+      clttimeout?: $parameters.cs-advanced.traffic-settings.client-timeout
+      insertvserveripport?: $parameters.cs-advanced.traffic-settings.insert-vserver-ipport
+      vipheader?: $parameters.cs-advanced.traffic-settings.vipheader
+      redirecturl?: $parameters.redirect-url
+      backupvserver?: $parameters.backupvserver-param
+      somethod?: $parameters.cs-advanced.spillover-settings.spillover-method
+      sothreshold?: $parameters.cs-advanced.spillover-settings.spillover-threshold
+      httpprofilename?: $parameters.cs-advanced.profiles.http-profile
+      tcpprofilename?: $parameters.cs-advanced.profiles.tcp-profile
+      netprofile?: $parameters.netprofile-param
+      downstateflush?: $parameters.cs-advanced.traffic-settings.flush-on-state-down
+      authentication?: $parameters.cs-advanced.auth-params.authentication
+      authenticationhost?: $parameters.cs-advanced.auth-params.authentication-host
+      authnvsname?: $parameters.cs-advanced.auth-params.authentication-vserver-name
+      authn401?: $parameters.cs-advanced.auth-params.authentication-http-401
+      appflowlog?: $parameters.cs-advanced.appflow-log
+    components: 
+      - 
+        name: default-lb-mon-comp
+        condition: $parameters.default-lb-pool
+        type: stlb::lb-mon-full-final-gts-09-02-2020   
+        description: "This component is used to generate the only LB Vserver for this config when there are no L7 rules supplied (no Content Switching)."
+        properties-default-sources:
+          - $parameters.default-lb-pool
+        properties: 
+          appname: $parameters.appname + "-" + $parameters.cs-service-type + "-" + str($parameters.cs-virtual-port) + "-cs-" +  $parameters.default-lb-pool.appname
+          lb-virtual-ip: 0.0.0.0
+          owner: $substitutions.fill-appowner($parameters.owner)
+          lb-virtual-port: 0
+        components:
+          - 
+            name: default-cs-lb-bind-comp
+            type: stlb::cs-lb-bind-gts-09-02-2020   
+            condition: $parameters.default-lb-pool
+            description: "This component is used to create and bind CS Policy to the CS vserver"
+            properties: 
+              csvserver-name: $parent.parent.properties.name
+              lbvserver-name: $parameters.appname + "-" + $parameters.cs-service-type + "-" + str($parameters.cs-virtual-port) + "-cs-" + $parameters.default-lb-pool.appname + "-" + $parameters.default-lb-pool.lb-service-type + "-" + "0" + "-" + $substitutions.fill-appowner($parameters.owner) + "-lbvserver"
+              is-default: true
+      - 
+        name: lb-mon-comps
+        type: stlb::lb-mon-full-final-gts-09-02-2020   
+        condition: $parameters.pools
+        description: "This list of components are used to generate LB Vservers for all the pools used in Content Switching (L7 rules supplied in parameters)"
+        repeat: $parameters.pools
+        repeat-item: pool
+        properties-default-sources:
+          - $pool.lb-pool
+        properties: 
+          appname: $parameters.appname + "-" + $parameters.cs-service-type + "-" + str($parameters.cs-virtual-port) + "-cs-" + $pool.lb-pool.appname
+          lb-virtual-ip: 0.0.0.0
+          owner: $substitutions.fill-appowner($parameters.owner)
+          lb-virtual-port: 0
+        components:
+          - 
+            name: cs-lb-bind-comp
+            type: stlb::cs-lb-bind-gts-09-02-2020   
+            description: "This component is used to create and bind CS Policy to the CS vserver"
+            properties: 
+              csvserver-name: $parent.parent.properties.name
+              lbvserver-name: $parameters.appname + "-" + $parameters.cs-service-type + "-" + str($parameters.cs-virtual-port) + "-cs-" + $pool.lb-pool.appname + "-" + $pool.lb-pool.lb-service-type + "-" + "0" + "-" + $substitutions.fill-appowner($parameters.owner) + "-lbvserver"
+              pool: $pool
+      - 
+        name: existing-cert-bindings-comp
+        type: ns::sslvserver_sslcertkey_binding 
+        description: "This component binds and existing certkey entities to a vserver."
+        condition: $parameters.cert-sect.existing-certificate-name and $parameters.cs-service-type == str("SSL")
+        properties: 
+          vservername: $parent.properties.name
+          certkeyname: $parameters.cert-sect.existing-certificate-name
+      - 
+        name: csvserver-certs-bindings
+        type: stlb::vserver-certs-binds
+        condition: $parameters.cert-sect.certificates and $parameters.cs-service-type == str("SSL") and not $parameters.cert-sect.existing-certificate-name
+        description: "This component is used for uploading and binding a list of certificates to a CS vserver"
+        properties: 
+          vserver-name: $parent.properties.name
+          certificates: $parameters.cert-sect.certificates
+  -
+    name: rewrite-config-comp
+    type: stlb::rewrite-config-gts-09-02-2020   
+    condition: $parameters.rewrite-config
+    properties-default-sources:
+      - $parameters
+    properties:
+      appname: $parameters.appname + "-" + $parameters.cs-service-type + "-" + str($parameters.cs-virtual-port) + "-cs"
+  -
+    name: rewrite-policies-bindings-comp
+    type: stlb::vserver-rewritepolicies-bindings
+    condition: $parameters.rewrite-config
+    properties:
+        vserver-name: $components.csvserver-comp.properties.name
+        vserver-type: CSVSERVER
+        policies:
+          -
+            name: $components.rewrite-config-comp.outputs.rewrite-request-policy-label
+            type: POLICYLABEL
+            bind-point: REQUEST
+          -
+            name: $components.rewrite-config-comp.outputs.rewrite-response-policy-label
+            type: POLICYLABEL
+            bind-point: RESPONSE
+  -
+    name: responder-config-comp
+    type: stlb::responder-config-gts-09-02-2020   
+    condition: $parameters.responder-config
+    properties-default-sources:
+      - $parameters
+    properties:
+      appname: $parameters.appname + "-" + $parameters.cs-service-type + "-" + str($parameters.cs-virtual-port) + "-cs"
+  -
+    name: responder-policies-bindings-comp
+    type: stlb::vserver-responderpolicies-bindings
+    condition: $parameters.responder-config
+    properties:
+        vserver-name: $components.csvserver-comp.properties.name
+        vserver-type: CSVSERVER
+        policies:
+          -
+            name: $components.responder-config-comp.outputs.responder-policy-label
+            type: POLICYLABEL
+            bind-point: REQUEST
+  -
+    name: sslcsvserver-comp
+    type: ns::sslvserver
+    condition: $parameters.ssl-config.ssl-profile
+    properties:
+      vservername: $components.csvserver-comp.properties.name
+      sslprofile: $parameters.ssl-config.ssl-profile
+outputs: 
+  - 
+    name: csvserver
+    value: $components.csvserver-comp
+    description: "Exposes the created CS vserver component"    
+  -
+    name: default-lbvserver
+    condition: $parameters.default-lb-pool
+    value: $components.csvserver-comp.components.default-lb-mon-comp.outputs.lbvserver
+    description: "The default LBvserver component"
+  -
+    name: non-default-lbvservers
+    condition: $parameters.pools
+    repeat: $components.csvserver-comp.components.lb-mon-comps
+    repeat-item: lb-mon-item 
+    value: $lb-mon-item.outputs.lbvserver
+    description: "The other LBvserver components to which traffic is switched based on rule"
+operations:
+  analytics:
+    -
+      name: csvserver-ops-comp
+      condition: $parameters.cs-service-type == str("SSL") OR $parameters.cs-service-type == str("HTTP")
+      properties:
+        target: $outputs.csvserver
+        filter: "true"
+        insights:
+          -
+            type: webinsight
+          -
+            type: securityinsight 

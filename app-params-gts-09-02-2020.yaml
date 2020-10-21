@@ -1,0 +1,58 @@
+--- 
+name: app-params-gts-09-02-2020  
+namespace: com.citrix.adc.commontypes
+version: "1.0"
+description: "This stylebook defines the parameters an application deployment. Appname + VIP + SNIP + ReqID + Owner"
+private: true
+schema-version: "1.0"
+import-stylebooks:
+  - 
+    namespace: com.citrix.adc.commontypes
+    prefix: cmtypes
+    version: "1.0"
+parameters: 
+  - 
+    name: appname
+    label: "Load Balanced Application Name"
+    description: "Name of the Load Balanced application"
+    type: string
+    key: true
+    gui:
+      updatable: true
+    required: true
+  - 
+    name: lb-virtual-ip
+    label: "Load Balanced App Virtual IP address"
+    description: "Virtual IP address representing the Load Balanced application. Leave blank for automatic allocation of IP Address from the IPAM network or specify IP address as needed"
+    type: ipaddress
+#    dynamic-allocation: true
+    required: true
+  -
+    name: snip
+    label: SNIP
+    type: object  
+    gui:
+      hidden: true   
+    parameters:  
+      - 
+        name: snip-ipaddress
+        label: IP Address
+        description: "The SNIP address for Backend connections"
+        type: ipaddress
+        gui:
+          hidden: true
+      -
+        name: snip-netmask
+        label: Netmask
+        description: "SNIP Netmask"
+        type: string
+        gui:
+          hidden: true
+        default: 255.255.254.0
+  - 
+    name: owner
+    label: "Owner"
+    description: "Service Owner team"
+    type: string
+    gui:
+      hidden: true

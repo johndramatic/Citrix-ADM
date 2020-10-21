@@ -1,0 +1,52 @@
+name: advanced-rewrite-gts-09-02-2020 
+namespace: com.citrix.adc.stylebooks
+version: "1.0"
+display-name: Request Path Replacement StyleBook
+private: true
+schema-version: "1.0"
+description: |    
+    This StyleBook replaces an Path component of the URL in requests with a new path.
+import-stylebooks: 
+  - 
+    namespace: netscaler.nitro.config
+    version: "13.0"
+    prefix: ns
+  - 
+    namespace: com.citrix.adc.commontypes
+    version: "1.0"
+    prefix: cmtypes
+parameters:
+    -
+        name: appname
+        type: string
+        required: true
+        label: Application Name
+        description: The Name of the Application
+    -
+        name: advanced-rewrite
+        type: object
+        label: Advanced Rewrite Parameters
+        description: The new path
+        parameters-default-sources:
+            - cmtypes::advanced-rewrite-params-gts-09-02-2020 
+components:
+  -
+    name: advanced-rewrite-action-comp
+    type: ns::rewriteaction
+    properties:
+        name: $parameters.appname + "-rewrite-action"
+        type: $parameters.advanced-rewrite.type
+        target: str($parameters.advanced-rewrite.target-location)
+        stringbuilderexpr: $parameters.advanced-rewrite.expresion-with
+    components:
+      -
+        name: advanced-rewrite-policy-comp
+        type: ns::rewritepolicy
+        properties:
+            name: $parameters.appname + "-rewrite-policy"
+            rule: $parameters.advanced-rewrite.pattern
+            action: $parent.properties.name
+outputs:
+    -
+        name: advanced-rewrite-policy
+        value: $components.advanced-rewrite-action-comp.components.advanced-rewrite-policy-comp

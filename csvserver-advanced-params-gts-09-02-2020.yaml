@@ -1,0 +1,163 @@
+--- 
+name: csvserver-advanced-params-gts-09-02-2020   
+namespace: com.citrix.adc.commontypes
+version: "1.0"
+description: "This StyleBook defines advanced settings for CS or LB Vservers."
+private: true
+schema-version: "1.0"
+parameters:      
+      -
+        name: traffic-settings
+        label: "Traffic Settings"
+        description: "Traffic Settings for VSERVER"
+        type: object
+        parameters:
+              - 
+                name: client-timeout
+                label: "CS App Client Timeout"
+                description: "Client connection timeout after inactivity in seconds. Idle time, in seconds, after which a client connection is terminated."
+                type: number
+                default: 180
+              - 
+                name: insert-vserver-ipport
+                label: "Virtual Server IP Port Insertion"
+                description: "Insert an HTTP header, whose value is the IP address and port number of the virtual server, before forwarding a request to the server."
+                type: string
+                default: "OFF"
+                allowed-values: 
+                  - "OFF"
+                  - VIPADDR
+#                gui:
+#                    dependent-parameters:
+#                        -
+#                            matching-values:
+#                                - VIPADDR
+#                            target-parameter: $parameters.traffic-settings.vipheader
+#                            action: show
+#                        -
+#                            matching-values:
+#                                - VIPADDR
+#                            target-parameter: $parameters.traffic-settings.vipheader
+#                            action: set-value
+#                            value: vip-header 
+              - 
+                name: vipheader
+                label: "Virtual Server IP Port Insertion Value"
+                description: "Name of virtual server IP and port header, for use with the VServer IP Port Insertion parameter."
+                type: string
+              -
+                name: flush-on-state-down
+                label: "Cleanup Connections when down"
+                description: "Cleanup all connections on this VIP when it goes down"
+                type: string
+                default: ENABLED
+                allowed-values:
+                    - ENABLED
+                    - DISABLED
+      -
+        name: spillover-settings
+        label: "Spillover Settings"
+        description: "Spillover Settings for VSERVER"
+        type: object
+        parameters:
+              - 
+                name: spillover-method
+                label: "Load Balanced App Threshold Type"
+                description: "Type of threshold that, when exceeded, triggers spillover."
+                type: string
+                allowed-values: 
+                  - NONE
+                  - CONNECTION
+                  - DYNAMICCONNECTION
+                  - BANDWIDTH
+                  - HEALTH
+#                gui:
+#                  dependent-parameters:
+#                    -
+#                      matching-values:
+#                        - CONNECTION
+#                        - BANDWIDTH
+#                        - HEALTH
+#                      target-parameter: $parameters.spillover-settings.spillover-threshold
+#                      action: show
+              - 
+                name: spillover-threshold
+                label: "Load Balanced App Threshold"
+                description: "Value of the thershold, when exceeded, triggers spillover. Threshold at which spillover occurs. Specify an integer for the CONNECTION spillover method, a bandwidth value in kilobits per second for the BANDWIDTH method (do not enter the units), or a percentage for the HEALTH method (do not enter the percentage symbol)."
+                type: number
+                min-value: 1
+                max-value: 4294967287
+      -
+        name: profiles
+        label: "Profiles"
+        description: "A profile is a collection of settings that can be applied to a Citrix ADC entity, such as a virtual server or service. You can apply the same profile to multiple entities of the same type. If you require any advanced profile settings, please contact Network Ops team for profile creation on the appliance."
+        type: object
+        parameters:
+            -
+                name: tcp-profile
+                label: "Name of TCP Profile"
+                description: "Name of TCP Profile to use for this VIP"
+                type: string
+            -
+                name: http-profile
+                label: "Name of HTTP Profile"
+                description: "Name of HTTP Profile to use for this VIP"
+                type: string
+        
+      -
+        name: auth-params
+        label: "Authentication Parameters"
+        description: "Parameters related to enabling authentication on this virtual IP"
+        type: object
+        parameters:
+            -
+                name: authentication
+                label: "Enable Authentication"
+                description: "Authenticate users who request a connection to this virtual IP"
+                type: string
+                default: "OFF"
+                allowed-values:
+                    - "ON"
+                    - "OFF"
+#                gui:
+#                  dependent-parameters:
+#                    -
+#                      matching-values:
+#                        - "ON"
+#                      target-parameter: $parameters.cs-advanced.auth-params.authentication-host
+#                      action: show
+#                    -
+#                      matching-values:
+#                        - "ON"
+#                      target-parameter: $parameters.cs-advanced.auth-params.authentication-vserver-name
+#                      action: show
+#                    -
+#                      matching-values:
+#                        - "ON"
+#                      target-parameter: $parameters.cs-advanced.auth-params.authentication-http-401
+#                      action: show
+            -
+                name: authentication-host
+                label: "FQDN of Auth VServer"
+                description: "The Authentication VServer FQDN to which users to this VIP are redirected to for authentication"
+                type: string
+            - 
+                name: authentication-vserver-name
+                label: "Name of Auth VServer"
+                type: string
+            - 
+                name: authentication-http-401
+                label: "Enable HTTP 401 Auth"
+                type: string
+                default: "OFF"
+                allowed-values:
+                    - "ON"
+                    - "OFF"
+      -
+          name: appflow-log
+          label: "Enable AppFlow"
+          type: string
+          default: ENABLED
+          allowed-values:
+              - ENABLED
+              - DISABLED

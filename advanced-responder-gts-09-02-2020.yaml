@@ -1,0 +1,51 @@
+name: advanced-responder-gts-09-02-2020 
+namespace: com.citrix.adc.stylebooks
+version: "1.0"
+display-name:  Redirect users to a different URL
+private: true
+schema-version: "1.0"
+description: |    
+    This StyleBook configures Citrix ADC to redirect users to another URL.
+import-stylebooks: 
+  - 
+    namespace: netscaler.nitro.config
+    version: "10.5"
+    prefix: ns
+  - 
+    namespace: com.citrix.adc.commontypes
+    version: "1.0"
+    prefix: cmtypes
+parameters:
+    -
+        name: appname
+        type: string
+        label: Application Name
+        required: true
+        description: The Name of the Application
+    -
+        name: advanced-responder-params
+        type: object
+        label: Responder Parameters
+        parameters-default-sources:
+            - cmtypes::advanced-responder-params-gts-09-02-2020 
+components:
+  -
+    name: redirect-url-action-comp
+    type: ns::responderaction
+    condition: $parameters.advanced-responder-params.type == str(redirect) or $parameters.advanced-responder-params.type == str(respondwith)
+    properties:
+        name: $parameters.appname + "-responder-action"
+        type: $parameters.advanced-responder-params.type
+        target: $parameters.advanced-responder-params.target-expr
+#        bypasssafetycheck: str(YES)
+  -
+    name: redirect-url-policy-comp
+    type: ns::responderpolicy
+    properties:
+        name: $parameters.appname + "-responder-policy"
+        rule: $parameters.advanced-responder-params.pattern
+        action: if-then-else($parameters.advanced-responder-params.type == str(redirect) or $parameters.advanced-responder-params.type == str(respondwith),$components.redirect-url-action-comp.properties.name,$parameters.advanced-responder-params.type)
+outputs:
+    -
+        name: redirect-url-policy
+        value: $components.redirect-url-policy-comp
