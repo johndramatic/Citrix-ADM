@@ -32,6 +32,8 @@ parameters-default-sources:
     - cmtypes::bot-profile-params-gts-09-02-2020
 substitutions: 
   lb-virtual-port(lb-virtual-port): if-then-else($lb-virtual-port == "*",str(ANY),str($lb-virtual-port))
+  lb-vsever(backupvserver-param): if-then-else(exists(backupvserver-param),$components.lb-config-comp-final-with-backup.outputs.lbvserver, $components.lb-config-comp-final-without-backup.outputs.lbvserver)
+
 components:
   -
     name: lb-config-comp-backup
@@ -73,5 +75,4 @@ outputs:
     
   - 
     name: lbvserver-comp-final
-    value: ($components.lb-config-comp-final-with-backup.outputs.lbvserver or $components.lb-config-comp-final-without-backup.outputs.lbvserver)
-    #value: if-then-else(exists($parameters.protection.backupvserver-param),str($components.lb-config-comp-final-with-backup.outputs.lbvserver),str($components.lb-config-comp-final-without-backup.outputs.lbvserver))
+    value: $substitutions.lb-vsever($parameters.protection.backupvserver-param)
