@@ -78,7 +78,7 @@ operations:
       name: csvserver-ops-comp-final
       condition: $components.cs-mon-comps.properties.cs-service-type == str("SSL") OR $components.cs-mon-comps.properties.cs-service-type == str("HTTP")
       properties:
-        target: str($components.cs-mon-comps.outputs.csvserver)
+        target: $components.cs-mon-comps.outputs.csvserver
         filter: "true"
         insights:
           -
