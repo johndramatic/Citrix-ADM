@@ -74,5 +74,6 @@ outputs:
     value: lb-config-comp-backup.outputs.lbvserver.properties.name
     
   - 
-    name: lbvserver-comp-final
-    value: $substitutions.lb-vsever($parameters.protection.backupvserver-param)
+    name: lbvserver-comp-withoutback-final
+    condition: exists($components.lb-config-comp-final-without-backup)
+    value: $components.lb-config-comp-final-without-backup.outputs.lbvserver
