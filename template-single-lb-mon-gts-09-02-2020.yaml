@@ -60,8 +60,20 @@ name: template-single-lb-mon-gts-09-02-2020
 namespace: com.citrix.adc.stylebooks
 operations: 
   analytics: 
+      - 
+      name: lbvserver-ops-comp0
+      condition: exists($components.lb-mon-comps.outputs.lbvserver-comp-with-final)
+      properties: 
+        filter: "true"
+        insights: 
+          - 
+            type: webinsight
+          - 
+            type: securityinsight
+        target: $components.lb-mon-comps.outputs.lbvserver-comp-with-final
     - 
       name: lbvserver-ops-comp1
+      condition: exists($components.lb-mon-comps.outputs.lbvserver-comp-without-final)
       properties: 
         filter: "true"
         insights: 
