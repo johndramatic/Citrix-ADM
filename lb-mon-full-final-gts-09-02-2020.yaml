@@ -75,3 +75,8 @@ outputs:
     name: lbvserver-comp-without-final
     condition: exists($components.lb-config-comp-final-without-backup)
     value: $components.lb-config-comp-final-without-backup.outputs.lbvserver
+    
+   - 
+    name: lbvserver-comp-with-final
+    condition: exists($components.lb-config-comp-final-with-backup)
+    value: $components.lb-config-comp-final-with-backup.outputs.lbvserver
