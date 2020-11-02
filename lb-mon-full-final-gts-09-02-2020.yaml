@@ -73,5 +73,4 @@ outputs:
     
   - 
     name: lbvserver-comp
-    condition: exists($components.lb-config-comp-final-without-backup)
     value: if-then-else($parameters.protection.backupvserver-param,$components.lb-config-comp-final-with-backup.outputs.lbvserver,$components.lb-config-comp-final-without-backup.outputs.lbvserver)
