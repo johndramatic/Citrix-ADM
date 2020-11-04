@@ -61,8 +61,8 @@ namespace: com.citrix.adc.stylebooks
 operations: 
   analytics: 
     - 
-      name: lbvserver-ops-comp0
       condition: exists($components.lb-mon-comps.outputs.lbvserver-comp-without-backup)
+      name: lbvserver-ops-comp0
       properties: 
         filter: "true"
         insights: 
@@ -71,9 +71,9 @@ operations:
           - 
             type: securityinsight
         target: $components.lb-mon-comps.outputs.lbvserver-comp-without-backup
-     - 
-      name: lbvserver-ops-comp0
+    - 
       condition: exists($components.lb-mon-comps.outputs.lbvserver-comp-with-backup)
+      name: lbvserver-ops-comp0
       properties: 
         filter: "true"
         insights: 
@@ -82,7 +82,6 @@ operations:
           - 
             type: securityinsight
         target: $components.lb-mon-comps.outputs.lbvserver-comp-with-backup
-
 parameters-default-sources: 
   - "cmtypes::app-params-gts-09-02-2020"
   - "cmtypes::lbvserver-params-gts-09-02-2020"
