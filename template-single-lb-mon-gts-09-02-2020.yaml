@@ -62,6 +62,7 @@ operations:
   analytics: 
     - 
       name: lbvserver-ops-comp0
+      condition: exists($components.lb-mon-comps.outputs.lbvserver-comp-without-backup)
       properties: 
         filter: "true"
         insights: 
@@ -69,7 +70,18 @@ operations:
             type: webinsight
           - 
             type: securityinsight
-        target: $components.lb-mon-comps.outputs.lbvserver-comp
+        target: $components.lb-mon-comps.outputs.lbvserver-comp-without-backup
+     - 
+      name: lbvserver-ops-comp0
+      condition: exists($components.lb-mon-comps.outputs.lbvserver-comp-with-backup)
+      properties: 
+        filter: "true"
+        insights: 
+          - 
+            type: webinsight
+          - 
+            type: securityinsight
+        target: $components.lb-mon-comps.outputs.lbvserver-comp-with-backup
 
 parameters-default-sources: 
   - "cmtypes::app-params-gts-09-02-2020"
